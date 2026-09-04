@@ -14,7 +14,7 @@
 //!
 
 fn main () {
-    println!("\n iterative method: {}", iterative());
+    println!("\niterative method: {}\n", iterative());
 }
 
 fn iterative () -> u64 {
@@ -32,16 +32,9 @@ fn iterative () -> u64 {
 }
 
 fn fib (n: u32) -> u64 {
-    if n == 0 { return 0; }
-
-    let mut a: u64 = 0;
-    let mut b: u64 = 1;
-
-    for _ in 2..=n {
-        let next = a + b;
-        a = b;
-        b = next;
+    let (mut a, mut b) = (0, 1);
+    for _ in 0..n {
+        (a, b) = (b, a + b);
     }
-
-    b
+    a
 }
