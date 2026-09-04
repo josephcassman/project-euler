@@ -15,7 +15,8 @@
 
 fn main () {
     println!("\niterative method: {}", iterative());
-    println!("\niterative2 method: {}\n", iterative2());
+    println!("\niterative2 method: {}", iterative2());
+    println!("\nformula method: {}\n", formula());
 }
 
 fn iterative () -> u64 {
@@ -67,4 +68,50 @@ fn iterative2 () -> u32 {
     }
 
     sum
+}
+
+/// The recurrence relation E can be used to derive
+/// a closed form formula.
+///
+///    E(n)     = 4 * E(n - 1) + E(n - 2)                                           # 1
+///    E(n + 1) = 4 * E(n) + E(n - 1)                                               # 2: Moving index
+///    4 * E(n) = E(n + 1) - E(n - 1)                                               # 3: Rearranging terms
+///
+/// Letting S[x] represent summation from 1 to n:
+///
+///    4 * S[E(k)] = S[E(k + 1) - E(k - 1)]
+///                = (E(2) - E(0)) + (E(3) - E(1)) + ... + (E(n + 1) - E(n - 1))    # 4: Expanding
+///                = E(2) - E(0) + E(3) - E(1) + ... + E(n + 1) - E(n - 1)          # 5: Removing parenthesis
+///                = -E(0) - E(1) + E(n + 1) + E(n)                                 # 6: Cancelling terms
+///                = E(n + 1) + E(n) - E(1) - E(0)
+///                = E(n + 1) + E(n) - 2 - 0
+///
+///    S = (E(n + 1) + E(n) - 2) / 4                                                # 7: Solving for S
+///
+/// We can use the Fibonacci definition to derive
+/// a replacement for E(n) which is the same as F(3 * n):
+///
+///    F(k)         = F(k - 1) + F(k - 2)
+///    F(3 * n + 2) = F(3 * n + 1) + F(3 * n)                                       # 8: Substitute 3 * n + 2 for k
+///    F(3 * n)     = F(3 * n + 2) - F(3 * n + 1)                                   # 9: Rearranging terms
+///
+/// Summarizing:
+///
+///    E(n + 1) = F(3 * n + 3)
+///             = F(3 * n + 2) + F(3 * n + 1)
+///    E(n)     = F(3 * n)
+///             = F(3 * n + 2) - F(3 * n + 1)
+///
+/// Finalizing the transformation:
+///
+///    S = (E(n + 1) + E(n) - 2) / 4                                                # 10: Restating 7
+///      = (F(3 * n + 2) + F(3 * n + 1) + F(3 * n + 2) - F(3 * n + 1) - 2) / 4      # 11: Substituting
+///      = (2 * F(3 * n + 2) - 2) / 4                                               # 12: Reducing
+///      = (F(3 * n + 2) - 1) / 2                                                   # 13: Simplifying
+///
+/// Since E(11) = 3_524_578 <= 4_000_000 < E(12) = 14_930_352, we must choose S(11).
+///
+fn formula () -> u64 {
+    use project_euler::fib;
+    (fib(3 * 11 + 2) - 1) / 2
 }
