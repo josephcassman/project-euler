@@ -14,7 +14,8 @@
 //!
 
 fn main () {
-    println!("\niterative method: {}\n", iterative());
+    println!("\niterative method: {}", iterative());
+    println!("\niterative2 method: {}\n", iterative2());
 }
 
 fn iterative () -> u64 {
@@ -26,6 +27,43 @@ fn iterative () -> u64 {
             sum += a;
         }
         (a, b) = (b, a + b);
+    }
+
+    sum
+}
+
+/// Given the fact that every third term in the Fibonacci sequence
+/// is even, the recurrence definition can be adjusted to give
+/// these values directly. F[i] is used as a short form for
+/// F[m + i] in the following:
+///
+///    F[m] = F[-1] + F[-2]                      # 1
+///         = (F[-2] + F[-3]) + F[-2]            # 2
+///         = 2 * F[-2] + F[-3]                  # 3: Combining terms
+///         = 2 * (F[-3] + F[-4]) + F[-3]        # 4
+///         = 3 * F[-3] + 2 * F[-4]              # 5: Combining terms
+///
+///    2 * F[-4] = F[-4] + (F[-5] + F[-6])       # 6
+///              = (F[-4] + F[-5]) + F[-6]       # 7
+///              = F[-3] + F[-6]                 # 8
+///
+///    F[m] = 3 * F[-3] + F[-3] + F[-6]          # 9: Combining 5 and 8
+///         = 4 * F[-3] + F[-6]                  # 10: Combining terms
+///
+/// We have derived the even sequence recurrence relation.
+/// By defining E(n) as F(3 * n), to represent the even sequence,
+/// we have the following:
+///
+///    F(3 * n) = 4 * F(3 * n - 3) + F(3 * n - 6)
+///    E(n)    = 4 * E(n - 1) + E(n - 2)
+///
+fn iterative2 () -> u32 {
+    let (mut a, mut b) = (2, 8);
+    let mut sum = 0;
+
+    while a <= 4_000_000 {
+        sum += a;
+        (a, b) = (b, 4 * b + a);
     }
 
     sum
