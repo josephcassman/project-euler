@@ -4,6 +4,8 @@
 //!
 //! https://projecteuler.net/problem=1
 //!
+//! Multiples of 3 or 5
+//!
 //! If we list all the natural numbers below $10$ that are multiples of 3 or 5,
 //! we get 3, 5, 6 and 9. The sum of these multiples is 23.
 //!
@@ -11,8 +13,8 @@
 //!
 
 fn main () {
-    println!("\n iterative method: {}", iterative());
-    println!("\n formula method: {}", formula());
+    println!("\niterative method: {}", iterative());
+    println!("\nformula method: {}\n", formula());
 }
 
 /// Straightforward iterative method, 𝛰(n)
