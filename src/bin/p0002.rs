@@ -13,21 +13,19 @@
 //! find the sum of the even-valued terms.
 //!
 
-use project_euler::fib;
-
 fn main () {
     println!("\niterative method: {}\n", iterative());
 }
 
-fn iterative () -> u64 {
-    let mut sum: u64 = 0;
-    let mut n: u32 = 1;
+fn iterative() -> u64 {
+    let (mut a, mut b) = (1, 2);
+    let mut sum = 0;
 
-    loop {
-        let a = fib(n);
-        if a > 4_000_000 { break; }
-        if a % 2 == 0 { sum += a; }
-        n += 1;
+    while a <= 4_000_000 {
+        if a % 2 == 0 {
+            sum += a;
+        }
+        (a, b) = (b, a + b);
     }
 
     sum
