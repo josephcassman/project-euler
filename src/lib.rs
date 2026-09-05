@@ -1,6 +1,7 @@
 // Copyright 2026 Joseph Cassman
 // SPDX-License-Identifier: Apache-2.0
 
+pub mod discrete_math;
 pub mod primes;
 
 pub fn fib (n: u32) -> u64 {
