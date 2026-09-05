@@ -22,13 +22,22 @@ fn iterative () -> usize {
 
     let mut r = 0;
 
-    for a in 100..=999 {
-    for b in 100..=999 {
-        let c = a * b;
-        if is_palindrome(&c.to_string()) && c > r {
-            r = c;
+    for a in (100..=999).rev() {
+        // The inner loop is in the range [100, 'a].
+        // 'a * 'a <= 'r means that 'a * 'b <= 'r since 'b <= 'a.
+        // As a result, the inner loop can be skipped.
+        if a * a <= r { break; }
+
+        // By limiting the inner loop to the range [100, 'a]
+        // we can avoid evaluating 'b * 'a which duplicates 'a * 'b.
+        for b in (100..=a).rev() {
+            let c = a * b;
+            if c <= r { break; }
+            if is_palindrome(&c.to_string()) {
+                r = c;
+            }
         }
-    }}
+    }
 
     r
 }
