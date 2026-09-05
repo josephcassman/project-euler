@@ -22,8 +22,8 @@ fn iterative () -> usize {
 
     let mut r = 0;
 
-    for a in 0..=999 {
-    for b in 0..=999 {
+    for a in 100..=999 {
+    for b in 100..=999 {
         let c = a * b;
         if is_palindrome(&c.to_string()) && c > r {
             r = c;
