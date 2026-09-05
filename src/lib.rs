@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pub mod discrete_math;
-pub mod primes;
+pub mod sequences;
 
 pub fn fib (n: u32) -> u64 {
     let (mut a, mut b) = (0, 1);

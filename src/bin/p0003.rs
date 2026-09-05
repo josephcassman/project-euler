@@ -15,7 +15,7 @@ fn main () {
 }
 
 fn iterative () -> usize {
-    use project_euler::primes::Primes;
+    use project_euler::sequences::primes::Primes;
 
     const N: usize = 600_851_475_143;
     let mut r = 0;
