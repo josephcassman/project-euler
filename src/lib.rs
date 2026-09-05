@@ -10,3 +10,13 @@ pub fn fib (n: u32) -> u64 {
     }
     a
 }
+
+pub fn is_palindrome (a: &str) -> bool {
+    let mut chars = a.chars();
+    while let (Some(x), Some(y)) = (chars.next(), chars.next_back()) {
+        if x != y {
+            return false;
+        }
+    }
+    true
+}
