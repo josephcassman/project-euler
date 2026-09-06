@@ -23,14 +23,14 @@
 //! What is the value of this product?
 //!
 
-use num_bigint::BigUint;
-
 fn main () {
-    let (digits, product) = brute_force();
+    let (digits, product) = iterate();
     println!("\nbrute-force method: digits = {}, product = {}\n", digits, product);
 }
 
-fn brute_force () -> (String, BigUint) {
+/// Nine to the power of thirteen is less than u64::MAX
+/// so the maximum product can fit.
+fn iterate () -> (String, u64) {
     let a = b"731671765313306249192251196744265747423553491949349698352031277450632623957831801698480186947885184385861560789112\
               949495459501737958331952853208805511125406987471585238630507156932909632952274430435576689664895044524452316173185\
               640309871112172238311362229893423380308135336276614282806444486645238749303589072962904915604407723907138105158593\
@@ -41,12 +41,12 @@ fn brute_force () -> (String, BigUint) {
               080719840385096245544436298123098787992724428490918884580156166097919133875499200524063689912560717606058861164671\
               0940507754100225698315520005593572972571636269561882670428252483600823257530420752963450";
 
-    let mut max = BigUint::ZERO;
+    let mut max: u64 = 0;
     let mut r: &[u8] = &[];
 
     for x in a.windows(13) {
-        let b: BigUint = x.iter().map(|&y| BigUint::from(y - b'0')).product();
-        if b == BigUint::ZERO { continue; }
+        let b: u64 = x.iter().map(|&y| (y - b'0') as u64).product();
+        if b == 0 { continue; }
 
         if b > max {
             max = b;
