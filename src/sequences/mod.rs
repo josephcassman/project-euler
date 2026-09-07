@@ -3,4 +3,5 @@
 
 pub mod primes;
 pub mod pythagorean_triples;
-pub mod six_mod_one;
+pub mod wheel_mod_six;
+pub mod wheel_mod_thirty;
