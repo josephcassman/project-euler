@@ -42,16 +42,16 @@ fn iterative () -> u64 {
 ///
 ///    F[m] = F[-1] + F[-2]                      # 1
 ///         = (F[-2] + F[-3]) + F[-2]            # 2
-///         = 2 * F[-2] + F[-3]                  # 3: Combining terms
+///         = 2 * F[-2] + F[-3]                  # 3: Combine terms
 ///         = 2 * (F[-3] + F[-4]) + F[-3]        # 4
-///         = 3 * F[-3] + 2 * F[-4]              # 5: Combining terms
+///         = 3 * F[-3] + 2 * F[-4]              # 5: Combine terms
 ///
 ///    2 * F[-4] = F[-4] + (F[-5] + F[-6])       # 6
 ///              = (F[-4] + F[-5]) + F[-6]       # 7
 ///              = F[-3] + F[-6]                 # 8
 ///
-///    F[m] = 3 * F[-3] + F[-3] + F[-6]          # 9: Combining 5 and 8
-///         = 4 * F[-3] + F[-6]                  # 10: Combining terms
+///    F[m] = 3 * F[-3] + F[-3] + F[-6]          # 9: Combine 5 and 8
+///         = 4 * F[-3] + F[-6]                  # 10: Combine terms
 ///
 /// We have derived the even sequence recurrence relation.
 /// By defining E(n) as F(3 * n), to represent the even sequence,
@@ -76,26 +76,26 @@ fn iterative2 () -> u32 {
 /// a closed form formula.
 ///
 ///    E(n)     = 4 * E(n - 1) + E(n - 2)                                           # 1
-///    E(n + 1) = 4 * E(n) + E(n - 1)                                               # 2: Moving index
-///    4 * E(n) = E(n + 1) - E(n - 1)                                               # 3: Rearranging terms
+///    E(n + 1) = 4 * E(n) + E(n - 1)                                               # 2: Move index
+///    4 * E(n) = E(n + 1) - E(n - 1)                                               # 3: Rearrange terms
 ///
 /// Letting S[x] represent summation from 1 to n:
 ///
 ///    4 * S[E(k)] = S[E(k + 1) - E(k - 1)]
-///                = (E(2) - E(0)) + (E(3) - E(1)) + ... + (E(n + 1) - E(n - 1))    # 4: Expanding
-///                = E(2) - E(0) + E(3) - E(1) + ... + E(n + 1) - E(n - 1)          # 5: Removing parenthesis
-///                = -E(0) - E(1) + E(n + 1) + E(n)                                 # 6: Cancelling terms
+///                = (E(2) - E(0)) + (E(3) - E(1)) + ... + (E(n + 1) - E(n - 1))    # 4: Expand
+///                = E(2) - E(0) + E(3) - E(1) + ... + E(n + 1) - E(n - 1)          # 5: Remove parenthesis
+///                = -E(0) - E(1) + E(n + 1) + E(n)                                 # 6: Cancel terms
 ///                = E(n + 1) + E(n) - E(1) - E(0)
 ///                = E(n + 1) + E(n) - 2 - 0
 ///
-///    S = (E(n + 1) + E(n) - 2) / 4                                                # 7: Solving for S
+///    S = (E(n + 1) + E(n) - 2) / 4                                                # 7: Solve for S
 ///
 /// We can use the Fibonacci definition to derive
 /// a replacement for E(n) which is the same as F(3 * n):
 ///
 ///    F(k)         = F(k - 1) + F(k - 2)
 ///    F(3 * n + 2) = F(3 * n + 1) + F(3 * n)                                       # 8: Substitute 3 * n + 2 for k
-///    F(3 * n)     = F(3 * n + 2) - F(3 * n + 1)                                   # 9: Rearranging terms
+///    F(3 * n)     = F(3 * n + 2) - F(3 * n + 1)                                   # 9: Rearrange terms
 ///
 /// Summarizing:
 ///
@@ -106,10 +106,10 @@ fn iterative2 () -> u32 {
 ///
 /// Finalizing the transformation:
 ///
-///    S = (E(n + 1) + E(n) - 2) / 4                                                # 10: Restating 7
-///      = (F(3 * n + 2) + F(3 * n + 1) + F(3 * n + 2) - F(3 * n + 1) - 2) / 4      # 11: Substituting
-///      = (2 * F(3 * n + 2) - 2) / 4                                               # 12: Reducing
-///      = (F(3 * n + 2) - 1) / 2                                                   # 13: Simplifying
+///    S = (E(n + 1) + E(n) - 2) / 4                                                # 10: Restate 7
+///      = (F(3 * n + 2) + F(3 * n + 1) + F(3 * n + 2) - F(3 * n + 1) - 2) / 4      # 11: Substitute
+///      = (2 * F(3 * n + 2) - 2) / 4                                               # 12: Reduce
+///      = (F(3 * n + 2) - 1) / 2                                                   # 13: Simplify
 ///
 /// Since E(11) = 3_524_578 <= 4_000_000 < E(12) = 14_930_352, we must choose S(11).
 ///
