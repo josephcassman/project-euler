@@ -66,7 +66,24 @@ fn segmented (limit: usize) -> Vec<usize> {
 
     // Use the Prime Number theorem to estimate
     // required storage capacity.
-    let mut r = Vec::with_capacity(((limit as f64) / f64::ln(limit as f64)) as usize);
+    //
+    // Since 𝑛 / ln 𝑛 is less than 𝜋(𝑛) for 𝑛 ≥ 17,
+    // use adjusted formulas that overestimate 𝜋.
+    // The more accurate estimate for 𝑛 ≥ 67 comes from
+    // the following inequality published in [1]:
+    //
+    //    𝑛 / (ln 𝑛 - 1/2) < 𝜋(𝑛) < 𝑛 / (ln 𝑛 - 3/2)
+    //
+    // [1] Rosser, J. Barkley, and Lowell Schoenfeld.
+    //     "Approximate Formulas for Some Functions of Prime Numbers."
+    //     Illinois Journal of Mathematics, vol. 6, no. 1, 1962, pp. 64–94.
+    //     Project Euclid, https://doi.org/10.1215/ijm/1255631807.
+    //
+    let capacity = if limit < 67 { (limit / 2) + 1 } else {
+        let x = limit as f64;
+        (x / (f64::ln(x) - 1.5)).ceil() as usize
+    };
+    let mut r = Vec::with_capacity(capacity);
     r.extend_from_slice(&base);
 
     // segment represents the next sequence of values to sieve.
@@ -195,10 +212,15 @@ mod tests {
     #[test]
     fn test_primes () {
         let expected = [
-            2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47,
+            2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31,
+            37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79,
+            83, 89, 97, 101, 103, 107, 109, 113, 127, 131,
+            137, 139, 149, 151, 157, 163, 167, 173, 179,
+            181, 191, 193, 197, 199, 211, 223, 227, 229,
+            233, 239, 241, 251, 257, 263, 269, 271,
         ];
 
-        let primes_res: Vec<_> = Primes::default().take(expected.len()).collect();
+        let primes_res: Vec<_> = Primes::new(500).take(expected.len()).collect();
         assert_eq!(primes_res, expected);
     }
 }
