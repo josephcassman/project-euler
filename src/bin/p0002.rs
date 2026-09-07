@@ -114,6 +114,9 @@ fn iterative2 () -> u32 {
 /// Since E(11) = 3_524_578 <= 4_000_000 < E(12) = 14_930_352, we must choose S(11).
 ///
 fn formula () -> u64 {
-    use project_euler::fib;
-    (fib(3 * 11 + 2) - 1) / 2
+    use project_euler::sequences::fibonacci::Fibonacci;
+
+    let n = 3 * 11 + 2;
+    let a = Fibonacci::default().nth(n).unwrap();
+    (a - 1) / 2
 }
