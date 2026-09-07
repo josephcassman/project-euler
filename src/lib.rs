@@ -21,3 +21,28 @@ pub fn is_palindrome (a: &str) -> bool {
     }
     true
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    ///
+    /// Use the following command to run all tests in this module:
+    ///
+    ///   cargo test --lib tests:: -- --nocapture
+    ///
+
+    #[test]
+    fn test_is_palindrome () {
+        assert!(is_palindrome(""));
+        assert!(is_palindrome("a"));
+        assert!(is_palindrome("abba"));
+        assert!(is_palindrome("noon"));
+        assert!(is_palindrome("racecar"));
+        assert!(is_palindrome("madam"));
+
+        assert!(!is_palindrome("ab"));
+        assert!(!is_palindrome("abc"));
+    }
+}
