@@ -171,6 +171,12 @@ impl Iterator for PythagoreanTriples {
 mod tests {
     use super::*;
 
+    ///
+    /// Use the following command to run all tests in this module:
+    ///
+    ///   cargo test --lib pythagorean_triples::tests -- --nocapture
+    ///
+
     #[test]
     fn test_primitive_pythagorean_triples () {
         let expected = [

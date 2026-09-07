@@ -84,6 +84,12 @@ pub const fn lcm (a: u64, b: u64) -> u64 {
 mod tests {
     use super::*;
 
+    ///
+    /// Use the following command to run all tests in this module:
+    ///
+    ///   cargo test --lib discrete_math::tests -- --nocapture
+    ///
+
     #[test]
     fn test_binary_gcd () {
         assert_eq!(gcd(48, 18), 6);

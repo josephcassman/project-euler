@@ -209,6 +209,12 @@ impl ExactSizeIterator for Primes {}
 mod tests {
     use super::*;
 
+    ///
+    /// Use the following command to run all tests in this module:
+    ///
+    ///   cargo test --lib sequences::primes::tests -- --nocapture
+    ///
+
     #[test]
     fn test_primes () {
         let expected = [
