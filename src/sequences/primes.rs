@@ -24,6 +24,8 @@ fn pi (n: usize) -> usize {
 }
 
 /// Simple Sieve of Eratosthenes
+/// Uses a mod 2 wheel to identify composites.
+///
 fn simple (limit: usize) -> Vec<usize> {
     if limit < 2 { return Vec::new(); }
 
@@ -37,14 +39,14 @@ fn simple (limit: usize) -> Vec<usize> {
     //
     // Bits translate to numbers using 𝑘:
     //
-    //    k / 64 → word = w
-    //    k % 64 → bit offset = b
+    //    k / 64 → word index = index
+    //    k % 64 → bit offset = offset
     //
     // These formulas are used to access the
     // individual bit of a number as shown below:
     //
-    //    is bit clear? = x[w] & (1 << b) == 0
-    //    set bit = x[w] | (1 << b)
+    //    is bit clear?  ⇒  x[index] & (1 << offset) == 0
+    //    set bit        ⇒  x[index] |= 1 << offset
     //
     let mut x = vec![0u64; (limit / 2) / 64 + 1];
     x[0] = 1; // k = 0 → number 1 is composite
@@ -147,20 +149,6 @@ fn segmented (limit: usize) -> Vec<usize> {
     let base_size = usize::isqrt(limit);
     let base = simple(base_size);
 
-    //
-    // 0 = prime, 1 = composite
-    //
-    // Bits translate to numbers as shown below:
-    //
-    //    number / 64 → word = w
-    //    number % 64 → bit offset = b
-    //
-    // These formulas are used to access the
-    // individual bit of a number as shown below:
-    //
-    //    is bit clear? = r[w] & (1 << b) == 0
-    //    set bit = r[w] | (1 << b)
-    //
     let mut r = Vec::with_capacity(pi(limit));
     r.extend_from_slice(&base);
 
@@ -168,18 +156,39 @@ fn segmented (limit: usize) -> Vec<usize> {
     // It is a sliding window over the integers which partititions values
     // remaining to be processed into subsets which can fit in L1 cache.
     //
+    // 0 = prime, 1 = composite
+    //
     let target_bit_size = usize::max(1024, cache_size::l1_cache_size().unwrap_or(32 * 1024) / 2) * 8;
     let required_bit_size = usize::max(limit.saturating_sub(base_size), 1);
     let segment_bit_size = usize::min(target_bit_size, required_bit_size);
     let segment_word_size = (segment_bit_size + 63) / 64;
     let mut segment = vec![0u64; segment_word_size];
 
-    // a identifies the next candidate prime.
-    // It will be incremented until it hits the limit.
+    // Values 𝑎 and 𝑏 identify the boundaries of the segment
+    // in terms of the subset of integers it currently represents.
+    //
+    //    𝑎 identifies the next number to process.
+    //    It is incremented until it hits the limit.
+    //
+    //    𝑏 is the largest number represented by the segment.
+    //
+    // Bits translate to numbers as shown below (the key difference
+    // from the simple sieve case is that numbers must be shifted into
+    // the segment by subtracting 𝑎):
+    //
+    //    k = number - a
+    //    k / 64 → word index = index
+    //    k % 64 → bit offset = offset
+    //
+    // These formulas are used to access the
+    // individual bit of a number as shown below:
+    //
+    //    is bit clear?  ⇒  segment[index] & (1 << offset) == 0
+    //    set bit        ⇒  segment[index] |= 1 << offset
+    //
     let mut a = base_size + 1;
     let segment_capacity = segment_word_size * 64;
     while a <= limit {
-        // b is the largest candidate prime in the segment.
         let b = usize::min(a.saturating_add(segment_capacity - 1), limit);
         let delta = ((b - a + 1) + 63) / 64;
 
