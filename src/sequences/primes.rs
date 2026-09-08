@@ -1,6 +1,28 @@
 // Copyright 2026 Joseph Cassman
 // SPDX-License-Identifier: Apache-2.0
 
+/// Estimate of the nth prime
+///
+/// Since 𝑛 / ln 𝑛 is less than 𝜋(𝑛) for 𝑛 ≥ 17,
+/// use adjusted formulas that overestimate 𝜋.
+/// The more accurate estimate for 𝑛 ≥ 67 comes from
+/// the following inequality published in [1]:
+///
+///    𝑛 / (ln 𝑛 - 1/2) < 𝜋(𝑛) < 𝑛 / (ln 𝑛 - 3/2)
+///
+/// [1] Rosser, J. Barkley, and Lowell Schoenfeld.
+///     "Approximate Formulas for Some Functions of Prime Numbers."
+///     Illinois Journal of Mathematics, vol. 6, no. 1, 1962, pp. 64–94.
+///     Project Euclid, https://doi.org/10.1215/ijm/1255631807.
+///
+fn pi (n: usize) -> usize {
+    if n < 67 { (n / 2) + 1 }
+    else {
+        let x = n as f64;
+        (x / (f64::ln(x) - 1.5)).ceil() as usize
+    }
+}
+
 /// Simple Sieve of Eratosthenes
 fn simple (limit: usize) -> Vec<usize> {
     if limit < 2 { return Vec::new(); }
@@ -8,19 +30,24 @@ fn simple (limit: usize) -> Vec<usize> {
     //
     // 0 = prime, 1 = composite
     //
-    // Bits translate to numbers as shown below:
+    // The algorithm uses a wheel mod 2:
     //
-    //    number / 64 → word = w
-    //    number % 64 → bit offset = b
+    //    number = { 2·𝑘 + 1 | 𝑘 ∈ ℤ ∧ 𝑘 ≥ 0 }
+    //    k = number / 2 (integral division)
+    //
+    // Bits translate to numbers using 𝑘:
+    //
+    //    k / 64 → word = w
+    //    k % 64 → bit offset = b
     //
     // These formulas are used to access the
     // individual bit of a number as shown below:
     //
-    //    is bit clear? = r[w] & (1 << b) == 0
-    //    set bit = r[w] | (1 << b)
+    //    is bit clear? = x[w] & (1 << b) == 0
+    //    set bit = x[w] | (1 << b)
     //
-    let mut r = vec![0u64; limit / 64 + 1];
-    r[0] = 0x3; // 0 and 1 are composite
+    let mut x = vec![0u64; (limit / 2) / 64 + 1];
+    x[0] = 1; // k = 0 → number 1 is composite
 
     // Why is it sufficient to search for composites up to
     // a limit 𝑛 using primes up to √𝑛? This is a lemma
@@ -48,17 +75,30 @@ fn simple (limit: usize) -> Vec<usize> {
     //   a number 𝑛 with no prime factor less than or equal to √𝑛
     //   cannot be composite.
 
-    for p in 2..=usize::isqrt(limit) {
+    for p in (3..=usize::isqrt(limit)).step_by(2) {
+        let p_k = p / 2;
+
         // Is bit p clear? ⇒ Is p prime?
-        if (r[p / 64] & (1 << (p % 64))) == 0 {
-            // Cross out multiples starting from p * p
-            for multiple in (p * p..=limit).step_by(p) {
-                r[multiple / 64] |= 1u64 << (multiple % 64);
+        if (x[p_k / 64] & (1u64 << (p_k % 64))) == 0 {
+            // Cross out odd multiples starting from p * p
+            for multiple in (p * p..=limit).step_by(2 * p) {
+                let m_k = multiple / 2;
+                x[m_k / 64] |= 1u64 << (m_k % 64);
             }
         }
     }
 
-    (2..=limit).filter(|&n| (r[n / 64] & (1 << (n % 64))) == 0).collect()
+    let mut r = Vec::with_capacity(pi(limit));
+    r.push(2);
+    r.extend(
+        (3..=limit)
+        .step_by(2)
+        .filter(|&n| {
+            let k = n / 2;
+            (x[k / 64] & (1u64 << (k % 64))) == 0
+        })
+    );
+    r
 }
 
 /// Segmented Sieve of Eratosthenes
@@ -75,26 +115,7 @@ fn segmented (limit: usize) -> Vec<usize> {
     let base_size = usize::isqrt(limit);
     let base = simple(base_size);
 
-    // Use the Prime Number theorem to estimate
-    // required storage capacity.
-    //
-    // Since 𝑛 / ln 𝑛 is less than 𝜋(𝑛) for 𝑛 ≥ 17,
-    // use adjusted formulas that overestimate 𝜋.
-    // The more accurate estimate for 𝑛 ≥ 67 comes from
-    // the following inequality published in [1]:
-    //
-    //    𝑛 / (ln 𝑛 - 1/2) < 𝜋(𝑛) < 𝑛 / (ln 𝑛 - 3/2)
-    //
-    // [1] Rosser, J. Barkley, and Lowell Schoenfeld.
-    //     "Approximate Formulas for Some Functions of Prime Numbers."
-    //     Illinois Journal of Mathematics, vol. 6, no. 1, 1962, pp. 64–94.
-    //     Project Euclid, https://doi.org/10.1215/ijm/1255631807.
-    //
-    let capacity = if limit < 67 { (limit / 2) + 1 } else {
-        let x = limit as f64;
-        (x / (f64::ln(x) - 1.5)).ceil() as usize
-    };
-    let mut r = Vec::with_capacity(capacity);
+    let mut r = Vec::with_capacity(pi(limit));
     r.extend_from_slice(&base);
 
     // segment represents the next sequence of values to sieve.
