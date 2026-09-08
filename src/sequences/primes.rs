@@ -147,6 +147,20 @@ fn segmented (limit: usize) -> Vec<usize> {
     let base_size = usize::isqrt(limit);
     let base = simple(base_size);
 
+    //
+    // 0 = prime, 1 = composite
+    //
+    // Bits translate to numbers as shown below:
+    //
+    //    number / 64 → word = w
+    //    number % 64 → bit offset = b
+    //
+    // These formulas are used to access the
+    // individual bit of a number as shown below:
+    //
+    //    is bit clear? = r[w] & (1 << b) == 0
+    //    set bit = r[w] | (1 << b)
+    //
     let mut r = Vec::with_capacity(pi(limit));
     r.extend_from_slice(&base);
 
@@ -154,23 +168,26 @@ fn segmented (limit: usize) -> Vec<usize> {
     // It is a sliding window over the integers which partititions values
     // remaining to be processed into subsets which can fit in L1 cache.
     //
-    let target_size = usize::max(1024, cache_size::l1_cache_size().unwrap_or(32 * 1024) / 2);
-    let required_byte_size = usize::max(limit.saturating_sub(base_size), 1);
-    let segment_size = usize::min(target_size, required_byte_size);
-    let mut segment = vec![true; segment_size];
+    let target_bit_size = usize::max(1024, cache_size::l1_cache_size().unwrap_or(32 * 1024) / 2) * 8;
+    let required_bit_size = usize::max(limit.saturating_sub(base_size), 1);
+    let segment_bit_size = usize::min(target_bit_size, required_bit_size);
+    let segment_word_size = (segment_bit_size + 63) / 64;
+    let mut segment = vec![0u64; segment_word_size];
 
     // a identifies the next candidate prime.
     // It will be incremented until it hits the limit.
     let mut a = base_size + 1;
+    let segment_capacity = segment_word_size * 64;
     while a <= limit {
         // b is the largest candidate prime in the segment.
-        let b = usize::min(a.saturating_add(segment.len() - 1), limit);
+        let b = usize::min(a.saturating_add(segment_capacity - 1), limit);
+        let delta = ((b - a + 1) + 63) / 64;
 
         // Reset the segment scratchpad.
         // Use a slice instead of accessing the segment directly
         // to keep the logic the same for the final iteration.
-        let x = &mut segment[..(b - a + 1)];
-        x.fill(true);
+        let x = &mut segment[..delta];
+        x.fill(0);
 
         // Use each prime in the necessary and sufficient base
         // to identify composite numbers greater than a.
@@ -203,15 +220,17 @@ fn segmented (limit: usize) -> Vec<usize> {
 
             // Mark each multiple of p as a composite.
             while m <= b {
-                x[m - a] = false;
+                let k = m - a;
+                x[k / 64] |= 1u64 << (k % 64);
                 m += p;
             }
         }
 
         // Add all primes from the current segment to the result.
-        for (i, &is_prime) in x.iter().enumerate() {
-            if is_prime {
-                r.push(a + i);
+        for n in a..=b {
+            let k = n - a;
+            if (x[k / 64] & (1u64 << (k % 64))) == 0 {
+                r.push(n);
             }
         }
 
