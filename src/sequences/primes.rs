@@ -35,7 +35,7 @@ fn simple (limit: usize) -> Vec<usize> {
     //   a number 𝑛 with no prime factor less than or equal to √𝑛
     //   cannot be composite.
 
-    let a = f64::sqrt(limit as f64) as usize;
+    let a = usize::isqrt(limit);
     for p in 2..=a {
         if r[p] {
             // Cross out multiples starting from p * p
@@ -59,7 +59,7 @@ fn segmented (limit: usize) -> Vec<usize> {
 
     // The simple sieve is used for values up to ⌊√limit⌋.
     // These primes are then used to identify subsequent composites.
-    let base_size = f64::sqrt(limit as f64) as usize;
+    let base_size = usize::isqrt(limit);
     let base = simple(base_size);
 
     // Use the Prime Number theorem to estimate
