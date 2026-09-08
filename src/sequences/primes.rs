@@ -9,8 +9,8 @@ fn simple (limit: usize) -> Vec<usize> {
     r[0] = false;
     r[1] = false;
 
-    // Why is it necessary and sufficient to search for composites
-    // up to a limit 𝑛 using primes up to √𝑛? This is a lemma
+    // Why is it sufficient to search for composites up to
+    // a limit 𝑛 using primes up to √𝑛? This is a lemma
     // from number theory that can be shown as follows.
     //
     //   Assume 𝑛 is composite. Then 𝑛 = 𝑎·𝑏 for some integers
