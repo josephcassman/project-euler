@@ -144,15 +144,16 @@ fn segmented (limit: usize) -> Vec<usize> {
     }
 
     // The simple sieve is used for values up to ⌊√limit⌋.
-    // These primes are then used to identify subsequent composites.
     let base_size = usize::isqrt(limit);
     let base = simple(base_size);
 
     let mut r = Vec::with_capacity(pi(limit));
     r.extend_from_slice(&base);
 
-    // segment represents the next sequence of values to sieve.
-    // Keep it in L1 cache, providing room for base and other values.
+    // segment is a scratchpad that stores a sequence of values to sieve.
+    // It is a sliding window over the integers which partititions values
+    // remaining to be processed into subsets which can fit in L1 cache.
+    //
     let target_size = usize::max(1024, cache_size::l1_cache_size().unwrap_or(32 * 1024) / 2);
     let required_byte_size = usize::max(limit.saturating_sub(base_size), 1);
     let segment_size = usize::min(target_size, required_byte_size);
