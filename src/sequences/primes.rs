@@ -5,9 +5,9 @@
 fn simple (limit: usize) -> Vec<usize> {
     if limit < 2 { return Vec::new(); }
 
-    let mut r = vec![true; limit + 1];
-    r[0] = false;
-    r[1] = false;
+    // 0 = prime, 1 = composite
+    let mut r = vec![0u64; limit / 64 + 1];
+    r[0] = 0x3; // 0 and 1 are composite
 
     // Why is it sufficient to search for composites up to
     // a limit 𝑛 using primes up to √𝑛? This is a lemma
@@ -35,17 +35,17 @@ fn simple (limit: usize) -> Vec<usize> {
     //   a number 𝑛 with no prime factor less than or equal to √𝑛
     //   cannot be composite.
 
-    let a = usize::isqrt(limit);
-    for p in 2..=a {
-        if r[p] {
+    for p in 2..=usize::isqrt(limit) {
+        // Is bit p clear? ⇒ Is p prime?
+        if (r[p / 64] & (1 << (p % 64))) == 0 {
             // Cross out multiples starting from p * p
             for multiple in (p * p..=limit).step_by(p) {
-                r[multiple] = false;
+                r[multiple / 64] |= 1u64 << (multiple % 64);
             }
         }
     }
 
-    (2..=limit).filter(|&n| r[n]).collect()
+    (2..=limit).filter(|&n| (r[n / 64] & (1 << (n % 64))) == 0).collect()
 }
 
 /// Segmented Sieve of Eratosthenes
@@ -216,18 +216,30 @@ mod tests {
     ///   cargo test --lib sequences::primes::tests -- --nocapture
     ///
 
-    #[test]
-    fn test_primes () {
-        let expected = [
-            2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31,
-            37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79,
-            83, 89, 97, 101, 103, 107, 109, 113, 127, 131,
-            137, 139, 149, 151, 157, 163, 167, 173, 179,
-            181, 191, 193, 197, 199, 211, 223, 227, 229,
-            233, 239, 241, 251, 257, 263, 269, 271,
-        ];
+    const PRIMES: [usize; 58] = [
+        2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31,
+        37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79,
+        83, 89, 97, 101, 103, 107, 109, 113, 127, 131,
+        137, 139, 149, 151, 157, 163, 167, 173, 179,
+        181, 191, 193, 197, 199, 211, 223, 227, 229,
+        233, 239, 241, 251, 257, 263, 269, 271,
+    ];
 
-        let primes_res: Vec<_> = Primes::new(500).take(expected.len()).collect();
-        assert_eq!(primes_res, expected);
+    #[test]
+    fn test_simple () {
+        let actual: Vec<_> = simple(500).into_iter().take(PRIMES.len()).collect();
+        assert_eq!(actual, PRIMES);
+    }
+
+    #[test]
+    fn test_segmented () {
+        let actual: Vec<_> = segmented(500).into_iter().take(PRIMES.len()).collect();
+        assert_eq!(actual, PRIMES);
+    }
+
+    #[test]
+    fn test_iterator () {
+        let actual: Vec<_> = Primes::new(500).take(PRIMES.len()).collect();
+        assert_eq!(actual, PRIMES);
     }
 }
