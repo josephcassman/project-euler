@@ -107,7 +107,21 @@ fn simple (limit: usize) -> Vec<usize> {
         }
     }
 
-    let mut r = Vec::with_capacity(pi(limit));
+    // Count the number of bits in x to get
+    // the capacity for the result.
+    //
+    // A = the number of even primes = 1
+    // B = odd number count = (limit - 1) / 2 + 1
+    // C = odd non-primes count = sum of bit count of each word in x
+    // D = odd primes = odd number count - odd non-primes count = B - C
+    //
+    // Capacity = A + D
+    //          = 1 + ((limit - 1) / 2 + 1) - 𝛴 bit-count(x[i])
+    //
+    let odd_count = (limit - 1) / 2 + 1;
+    let composite_count: usize = x.iter().map(|&a| a.count_ones() as usize).sum();
+    let capacity = 1 + (odd_count - composite_count);
+    let mut r = Vec::with_capacity(capacity);
     r.push(2);
     r.extend(
         (3..=limit)
