@@ -5,7 +5,20 @@
 fn simple (limit: usize) -> Vec<usize> {
     if limit < 2 { return Vec::new(); }
 
+    //
     // 0 = prime, 1 = composite
+    //
+    // Bits translate to numbers as shown below:
+    //
+    //    number / 64 → word = w
+    //    number % 64 → bit offset = b
+    //
+    // These formulas are used to access the
+    // individual bit of a number as shown below:
+    //
+    //    is bit clear? = r[w] & (1 << b) == 0
+    //    set bit = r[w] | (1 << b)
+    //
     let mut r = vec![0u64; limit / 64 + 1];
     r[0] = 0x3; // 0 and 1 are composite
 
