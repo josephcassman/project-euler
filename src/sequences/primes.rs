@@ -50,8 +50,6 @@ fn simple (limit: usize) -> Vec<usize> {
 
 /// Segmented Sieve of Eratosthenes
 fn segmented (limit: usize) -> Vec<usize> {
-    const CACHE_SIZE: usize = 65_536;
-
     match limit {
         0 | 1 => return Vec::new(),
         2 => return vec![2],
@@ -87,8 +85,11 @@ fn segmented (limit: usize) -> Vec<usize> {
     r.extend_from_slice(&base);
 
     // segment represents the next sequence of values to sieve.
-    // Keep it in L1 cache.
-    let mut segment = vec![true; usize::max(CACHE_SIZE, base_size)];
+    // Keep it in L1 cache, providing room for base and other values.
+    let target_size = usize::max(1024, cache_size::l1_cache_size().unwrap_or(32 * 1024) / 2);
+    let required_byte_size = usize::max(limit.saturating_sub(base_size), 1);
+    let segment_size = usize::min(target_size, required_byte_size);
+    let mut segment = vec![true; segment_size];
 
     // a identifies the next candidate prime.
     // It will be incremented until it hits the limit.
