@@ -80,9 +80,28 @@ fn simple (limit: usize) -> Vec<usize> {
 
         // Is bit p clear? ⇒ Is p prime?
         if (x[p_k / 64] & (1u64 << (p_k % 64))) == 0 {
-            // Cross out odd multiples starting from p * p
-            for multiple in (p * p..=limit).step_by(2 * p) {
-                let m_k = multiple / 2;
+            // Cross out odd multiples.
+            //
+            // Iterating over k (indices of multiples)
+            // instead of multiples of p allows a division
+            // to be pulled out of the inner loop:
+            //
+            // Iterate over multiples of p:
+            //
+            //    multiple ∈ [p², limit] step by 2 * p
+            //       k = multiple / 2
+            //       set bit k
+            //
+            // Iterate over k (indices of multiples):
+            //
+            //    k ∈ [p² / 2, limit / 2] step by p
+            //       set bit k
+            //
+
+            let alpha_k = (p * p) / 2;
+            let beta_k = (limit - 1) / 2;
+
+            for m_k in (alpha_k..=beta_k).step_by(p) {
                 x[m_k / 64] |= 1u64 << (m_k % 64);
             }
         }
