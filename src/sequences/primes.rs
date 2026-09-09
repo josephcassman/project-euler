@@ -139,7 +139,7 @@ fn simple (limit: usize) -> Vec<usize> {
 /// Segmented Sieve of Eratosthenes
 /// Uses a mod 2 wheel to identify composites.
 ///
-fn segmented (limit: usize) -> Vec<usize> {
+pub fn eratosthenes (limit: usize) -> Vec<usize> {
     match limit {
         0 | 1 => return Vec::new(),
         2 => return vec![2],
@@ -277,7 +277,7 @@ pub struct Primes {
 
 impl Primes {
     pub fn new (limit: usize) -> Self {
-        let buf = segmented(limit);
+        let buf = eratosthenes(limit);
         let end = buf.len();
         Self { buf, start: 0, end, }
     }
@@ -346,7 +346,7 @@ mod tests {
 
     #[test]
     fn test_segmented () {
-        let actual: Vec<_> = segmented(500).into_iter().take(PRIMES.len()).collect();
+        let actual: Vec<_> = eratosthenes(500).into_iter().take(PRIMES.len()).collect();
         assert_eq!(actual, PRIMES);
     }
 

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pub mod discrete_math;
+pub mod factorization;
 pub mod sequences;
 
 pub fn is_palindrome (a: &str) -> bool {
