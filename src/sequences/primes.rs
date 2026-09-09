@@ -137,6 +137,8 @@ fn simple (limit: usize) -> Vec<usize> {
 }
 
 /// Segmented Sieve of Eratosthenes
+/// Uses a mod 2 wheel to identify composites.
+///
 fn segmented (limit: usize) -> Vec<usize> {
     match limit {
         0 | 1 => return Vec::new(),
@@ -152,18 +154,6 @@ fn segmented (limit: usize) -> Vec<usize> {
     let mut r = Vec::with_capacity(pi(limit));
     r.extend_from_slice(&base);
 
-    // segment is a scratchpad that stores a sequence of values to sieve.
-    // It is a sliding window over the integers which partititions values
-    // remaining to be processed into subsets which can fit in L1 cache.
-    //
-    // 0 = prime, 1 = composite
-    //
-    let target_bit_size = usize::max(1024, cache_size::l1_cache_size().unwrap_or(32 * 1024) / 2) * 8;
-    let required_bit_size = usize::max(limit.saturating_sub(base_size), 1);
-    let segment_bit_size = usize::min(target_bit_size, required_bit_size);
-    let segment_word_size = (segment_bit_size + 63) / 64;
-    let mut segment = vec![0u64; segment_word_size];
-
     // Values 𝑎 and 𝑏 identify the boundaries of the segment
     // in terms of the subset of integers it currently represents.
     //
@@ -176,7 +166,8 @@ fn segmented (limit: usize) -> Vec<usize> {
     // from the simple sieve case is that numbers must be shifted into
     // the segment by subtracting 𝑎):
     //
-    //    k = number - a
+    //    number = { 2·𝑘 + 1 | 𝑘 ∈ ℤ ∧ 𝑘 ≥ 0 }
+    //    k = (number - a) / 2 (integral division)
     //    k / 64 → word index = index
     //    k % 64 → bit offset = offset
     //
@@ -186,11 +177,27 @@ fn segmented (limit: usize) -> Vec<usize> {
     //    is bit clear?  ⇒  segment[index] & (1 << offset) == 0
     //    set bit        ⇒  segment[index] |= 1 << offset
     //
-    let mut a = base_size + 1;
-    let segment_capacity = segment_word_size * 64;
-    while a <= limit {
-        let b = usize::min(a.saturating_add(segment_capacity - 1), limit);
-        let delta = ((b - a + 1) + 63) / 64;
+    let mut a = (base_size + 1) | 1;
+
+    // segment is a scratchpad that stores a sequence of values to sieve.
+    // It is a sliding window over the integers which partititions values
+    // remaining to be processed into subsets which can fit in L1 cache.
+    //
+    // 0 = prime, 1 = composite
+    //
+    let limit_odd = if limit % 2 == 0 { limit - 1 } else { limit };
+    let target_bit_size = usize::max(1024, cache_size::l1_cache_size().unwrap_or(32 * 1024) / 2) * 8;
+    let required_bit_size = usize::max(limit_odd.saturating_sub(a) / 2 + 1, 1);
+    let segment_bit_size = usize::min(target_bit_size, required_bit_size);
+    let segment_word_size = (segment_bit_size + 63) / 64;
+    let mut segment = vec![0u64; segment_word_size];
+
+    let segment_capacity = segment_word_size * 64; // counts odd numbers
+
+    while a <= limit_odd {
+        let b = usize::min(a.saturating_add(2 * (segment_capacity - 1)), limit_odd);
+        let odd_count = (b - a) / 2 + 1;
+        let delta = (odd_count + 63) / 64;
 
         // Reset the segment scratchpad.
         // Use a slice instead of accessing the segment directly
@@ -198,55 +205,65 @@ fn segmented (limit: usize) -> Vec<usize> {
         let x = &mut segment[..delta];
         x.fill(0);
 
-        // Use each prime in the necessary and sufficient base
-        // to identify composite numbers greater than a.
-        for &p in &base {
-            //
-            // The value of a mod p, the remainder, represents
-            // how far a is passed the previous multiple of p.
-            // So the value of a sits in the interval
-            //
-            //    [a - rem, a - rem + p]
-            //    [a - rem, a + (p - rem)]
-            //
-            // Example. The current value to evaluate a is 23,
-            //   that is, the segment starts at 23. Right now
-            //   we are crossing out multiples of 7 (composites).
-            //
-            //    rem = 23 mod 7 = 2
-            //    [23 - 2, 23 + (7 - 2)] = [21, 28]
-            //    The value 28 is the next multiple of p = 7.
-            //
-            let rem = a % p;
-            let mut m = if rem == 0 { a } else { a + (p - rem) };
+        for &p in &base[1..] { // skip 2
+            // 𝑚 is the first odd multiple of 𝑝 ≥ 𝑎
+            // starting at 𝑝² or higher.
+            let m = if a <= p * p { p * p } else {
+                //
+                // When 𝑎 is not a multiple of 𝑝, it is in the
+                // interval shown below (rem = 𝑎 mod 𝑝):
+                //
+                //    [preceding multiple, next multiple]  ⇒
+                //    [𝑎 - rem, 𝑎 - rem + 𝑝]               ⇒
+                //    [𝑎 - rem, 𝑎 + (𝑝 - rem)]
+                //
+                // Example. Let 𝑎 = 23 and 𝑝 = 7. This means
+                //   we are starting at 23 and crossing out
+                //   multiples of 7 (composites).
+                //
+                //    rem = 23 mod 7 = 2
+                //    [23 - 2, 23 + (7 - 2)] = [21, 28]
+                //
+                // The value 28 is the next multiple of 𝑝 = 7.
+                // Because 28 is even, 𝑝 is added to start at 35,
+                // the first odd multiple of 7 greater than 23.
+                //
+                let rem = a % p;
+                let mut m = if rem == 0 { a } else { a + (p - rem) };
+                if m % 2 == 0 {
+                    m += p; // ensure m is odd
+                }
+                m
+            };
 
-            // We can skip past multiples of p less than p²
-            // because a composite less than p² must have at least
-            // one prime factor small than p. Smaller primes
-            // processed up until this point would have already
-            // identified such composites.
-            if m < p * p { m = p * p; }
+            if m > b { continue; }
 
-            // Mark each multiple of p as a composite.
-            while m <= b {
-                let k = m - a;
+            // Mark each multiple of 𝑝 as a composite.
+            let mut k = (m - a) / 2;
+            while k < odd_count {
                 x[k / 64] |= 1u64 << (k % 64);
-                m += p;
+                k += p;
             }
         }
 
-        // Add all primes from the current segment to the result.
-        for n in a..=b {
-            let k = n - a;
-            if (x[k / 64] & (1u64 << (k % 64))) == 0 {
-                r.push(n);
+        // Extract primes from the current segment.
+        for (i, &word) in x.iter().enumerate() {
+            let mut prime_bits = !word;
+            let base_k = i * 64;
+
+            while prime_bits != 0 {
+                let lsb = prime_bits.trailing_zeros() as usize;
+                let k = base_k + lsb;
+                if k >= odd_count { break; }
+                r.push(a + 2 * k);
+                prime_bits &= prime_bits - 1; // clsb
             }
         }
 
-        if b == limit { break; }
+        if b == limit_odd { break; }
 
         // Skip to the next window.
-        a = b + 1;
+        a = b + 2;
     }
 
     r
