@@ -57,6 +57,7 @@ version = "0.1.0"
 dependencies = [
  "cache-size",
  "num-bigint",
+ "num-traits",
 ]
 
 [[package]]
