@@ -32,7 +32,8 @@ use std::str::FromStr;
 use num_bigint::BigUint;
 
 fn main () {
-    println!("\nbrute-force method: {}\n", brute_force());
+    println!("\nbrute-force method: {}", brute_force());
+    println!("\niterative method: {}\n", iterative());
 }
 
 ///
@@ -60,4 +61,19 @@ fn brute_force () -> BigUint {
 
     let twenty = factorial(20);
     factorial(40) / (twenty.clone() * twenty)
+}
+
+///
+/// The iterative approach to calculating the binomial coefficient
+/// can be used to reduce the overall integral size needed.
+///
+///    𝐶(𝑛, 𝑘) = 𝑛 × (𝑛-1) × ⋯ × (𝑛-𝑘+1) ∕ 𝑘 × (𝑘-1) × ⋯ × 1
+///            = 𝛱 𝑖 ∊ [1, 𝑘] (𝑛 + 1 - 𝑖) ∕ 𝑖
+///
+fn iterative () -> u64 {
+    let mut r: u64 = 1;
+    for i in 1..=20 {
+        r = (r * (40 - 20 + i)) / i;
+    }
+    r
 }
