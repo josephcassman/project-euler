@@ -1,7 +1,8 @@
 // Copyright 2026 Joseph Cassman
 // SPDX-License-Identifier: Apache-2.0
 
-/// tau(n)
+/// 𝜏(𝑛) or 𝜎₀(𝑛)
+/// the number of divisors of 𝑛
 ///
 /// Factorize by trial division.
 /// req: primes contains primes at least up to √𝑛
@@ -31,6 +32,24 @@ pub fn tau (mut n: usize, primes: &[usize]) -> usize {
     // Any value 𝑛 greater than 1 must be prime
     // so it has two factors: itself and 1.
     if n > 1 { r *= 2; }
+
+    r
+}
+
+/// 𝜎(𝑛) or 𝜎₁(𝑛)
+/// the sum of the divisors of 𝑛
+///
+/// This sieve determines which numbers an integer 𝑑
+/// divides and then adds 𝑑 to all of its multiples.
+///
+pub fn sigma_sieve (limit: usize) -> Vec<u64> {
+    let mut r = vec![0u64; limit + 1];
+
+    for a in 1..=limit {
+        for b in (a..=limit).step_by(a) {
+            r[b] += a as u64;
+        }
+    }
 
     r
 }
