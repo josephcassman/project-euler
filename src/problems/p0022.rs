@@ -21,9 +21,13 @@
 use std::error::Error;
 use std::fs::File;
 
-pub fn run () -> Result<(), Box<dyn Error>> {
-    println!("\niterative method: {:?}\n", iterative());
-    Ok(())
+pub fn run () {
+    pub fn f () -> Result<(), Box<dyn Error>> {
+        println!("\niterative method: {:?}\n", iterative());
+        Ok(())
+    }
+
+    f().expect("Problem 22 failed with an error");
 }
 
 /// import names from open file
