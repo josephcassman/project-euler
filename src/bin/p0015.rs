@@ -27,8 +27,6 @@
 //! How many such routes are there through a 20 × 20 grid?
 //!
 
-use std::str::FromStr;
-
 use num_bigint::BigUint;
 
 fn main () {
@@ -53,11 +51,7 @@ fn main () {
 ///    𝐶(𝑛, 𝑘) = 𝑛! ∕ 𝑘!·(𝑛 - 𝑘)!
 ///
 fn brute_force () -> BigUint {
-    fn factorial (n: usize) -> BigUint {
-        let mut r = BigUint::from_str("1").unwrap();
-        for i in 1..=n { r *= i; }
-        r
-    }
+    use project_euler::discrete_math::factorial;
 
     let twenty = factorial(20);
     factorial(40) / (twenty.clone() * twenty)

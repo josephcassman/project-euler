@@ -1,6 +1,9 @@
 // Copyright 2026 Joseph Cassman
 // SPDX-License-Identifier: Apache-2.0
 
+use num_bigint::BigUint;
+use num_traits::One;
+
 /// Calculate the Greatest Common Divisor (GCD)
 /// for two numbers using Stein's binary algorithm.
 ///
@@ -80,9 +83,16 @@ pub const fn lcm (a: u64, b: u64) -> u64 {
     (a / gcd(a, b)) * b
 }
 
+/// 𝑛!
+pub fn factorial (n: u64) -> BigUint {
+    (1..=n).fold(BigUint::one(), |acc, x| acc * x)
+}
+
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use std::str::FromStr;
+
+use super::*;
 
     ///
     /// Use the following command to run all tests in this module:
@@ -102,5 +112,19 @@ mod tests {
         assert_eq!(lcm(48, 18), 144);
         assert_eq!(lcm(0, 5), 0);
         assert_eq!(lcm(4, 6), 12);
+    }
+
+    #[test]
+    fn test_factorial () {
+        assert_eq!(factorial(0), BigUint::one());
+        assert_eq!(factorial(1), BigUint::one());
+        assert_eq!(factorial(2), BigUint::from_str("2").unwrap());
+        assert_eq!(factorial(3), BigUint::from_str("6").unwrap());
+        assert_eq!(factorial(4), BigUint::from_str("24").unwrap());
+        assert_eq!(factorial(5), BigUint::from_str("120").unwrap());
+        assert_eq!(factorial(6), BigUint::from_str("720").unwrap());
+        assert_eq!(factorial(7), BigUint::from_str("5040").unwrap());
+        assert_eq!(factorial(8), BigUint::from_str("40320").unwrap());
+        assert_eq!(factorial(20), BigUint::from_str("2432902008176640000").unwrap());
     }
 }

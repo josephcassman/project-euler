@@ -15,21 +15,16 @@
 //! Find the sum of the digits in the number 100!.
 //!
 
-use num_bigint::BigUint;
-use num_traits::One;
-
 fn main () {
     println!("\ncalculation method: {}\n", calculation());
 }
 
 fn calculation () -> u64 {
+    use project_euler::discrete_math::factorial;
+
     factorial(100)
     .to_string()
     .bytes()
     .map(|x| (x - b'0') as u64)
     .sum::<u64>()
-}
-
-fn factorial (n: u64) -> BigUint {
-    (1..=n).fold(BigUint::one(), |acc, x| acc * x)
 }
