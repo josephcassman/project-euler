@@ -28,8 +28,8 @@ struct Args {
     problem: String,
 }
 
-const PROBLEMS: [(u32, fn()); 24] = {
-    let r: [(u32, fn()); 24] = [
+const PROBLEMS: [(u32, fn()); 25] = {
+    [
         (1, p0001::run),
         (2, p0002::run),
         (3, p0003::run),
@@ -54,6 +54,6 @@ const PROBLEMS: [(u32, fn()); 24] = {
         (23, p0023::run),
         (24, p0024::run),
         (25, p0025::run),
-    ];
-    r
+        (26, p0026::run),
+    ]
 };

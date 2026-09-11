@@ -26,3 +26,4 @@ pub mod p0022;
 pub mod p0023;
 pub mod p0024;
 pub mod p0025;
+pub mod p0026;

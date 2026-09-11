@@ -3,8 +3,8 @@
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct PrimeFactor {
-    p: u64,
-    count: usize,
+    pub p: u64,
+    pub count: usize,
 }
 
 /// Prime factors of 𝑛
