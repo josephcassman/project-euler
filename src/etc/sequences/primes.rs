@@ -26,7 +26,7 @@ fn pi (n: usize) -> usize {
 /// Simple Sieve of Eratosthenes
 /// Uses a mod 2 wheel to identify composites.
 ///
-fn simple (limit: usize) -> Vec<usize> {
+fn simple (limit: usize) -> Vec<u64> {
     if limit < 2 { return Vec::new(); }
 
     //
@@ -123,13 +123,13 @@ fn simple (limit: usize) -> Vec<usize> {
     let odd_count = (limit - 1) / 2 + 1;
     let composite_count: usize = x.iter().map(|&a| a.count_ones() as usize).sum();
     let capacity = 1 + (odd_count - composite_count);
-    let mut r = Vec::with_capacity(capacity);
+    let mut r: Vec<u64> = Vec::with_capacity(capacity);
     r.push(2);
     r.extend(
-        (3..=limit)
+        (3u64..=(limit as u64))
         .step_by(2)
         .filter(|&n| {
-            let k = n / 2;
+            let k = (n / 2) as usize;
             (x[k / 64] & (1u64 << (k % 64))) == 0
         })
     );
@@ -139,7 +139,7 @@ fn simple (limit: usize) -> Vec<usize> {
 /// Segmented Sieve of Eratosthenes
 /// Uses a mod 2 wheel to identify composites.
 ///
-pub fn eratosthenes (limit: usize) -> Vec<usize> {
+pub fn eratosthenes (limit: usize) -> Vec<u64> {
     match limit {
         0 | 1 => return Vec::new(),
         2 => return vec![2],
@@ -151,7 +151,7 @@ pub fn eratosthenes (limit: usize) -> Vec<usize> {
     let base_size = usize::isqrt(limit);
     let base = simple(base_size);
 
-    let mut r = Vec::with_capacity(pi(limit));
+    let mut r: Vec<u64> = Vec::with_capacity(pi(limit));
     r.extend_from_slice(&base);
 
     // Values 𝑎 and 𝑏 identify the boundaries of the segment
@@ -177,7 +177,7 @@ pub fn eratosthenes (limit: usize) -> Vec<usize> {
     //    is bit clear?  ⇒  segment[index] & (1 << offset) == 0
     //    set bit        ⇒  segment[index] |= 1 << offset
     //
-    let mut a = (base_size + 1) | 1;
+    let mut a = ((base_size + 1) | 1) as u64;
 
     // segment is a scratchpad that stores a sequence of values to sieve.
     // It is a sliding window over the integers which partititions values
@@ -185,9 +185,9 @@ pub fn eratosthenes (limit: usize) -> Vec<usize> {
     //
     // 0 = prime, 1 = composite
     //
-    let limit_odd = if limit % 2 == 0 { limit - 1 } else { limit };
+    let limit_odd = if limit % 2 == 0 { limit - 1 } else { limit } as u64;
     let target_bit_size = usize::max(1024, cache_size::l1_cache_size().unwrap_or(32 * 1024) / 2) * 8;
-    let required_bit_size = usize::max(limit_odd.saturating_sub(a) / 2 + 1, 1);
+    let required_bit_size = u64::max(limit_odd.saturating_sub(a) / 2 + 1, 1) as usize;
     let segment_bit_size = usize::min(target_bit_size, required_bit_size);
     let segment_word_size = (segment_bit_size + 63) / 64;
     let mut segment = vec![0u64; segment_word_size];
@@ -195,8 +195,8 @@ pub fn eratosthenes (limit: usize) -> Vec<usize> {
     let segment_capacity = segment_word_size * 64; // counts odd numbers
 
     while a <= limit_odd {
-        let b = usize::min(a.saturating_add(2 * (segment_capacity - 1)), limit_odd);
-        let odd_count = (b - a) / 2 + 1;
+        let b = u64::min(a.saturating_add(2 * ((segment_capacity as u64) - 1)), limit_odd);
+        let odd_count = ((b - a) / 2 + 1) as usize;
         let delta = (odd_count + 63) / 64;
 
         // Reset the segment scratchpad.
@@ -239,10 +239,10 @@ pub fn eratosthenes (limit: usize) -> Vec<usize> {
             if m > b { continue; }
 
             // Mark each multiple of 𝑝 as a composite.
-            let mut k = (m - a) / 2;
+            let mut k = ((m - a) / 2) as usize;
             while k < odd_count {
                 x[k / 64] |= 1u64 << (k % 64);
-                k += p;
+                k += p as usize;
             }
         }
 
@@ -253,9 +253,9 @@ pub fn eratosthenes (limit: usize) -> Vec<usize> {
 
             while prime_bits != 0 {
                 let lsb = prime_bits.trailing_zeros() as usize;
-                let k = base_k + lsb;
+                let k = (base_k + lsb) as usize;
                 if k >= odd_count { break; }
-                r.push(a + 2 * k);
+                r.push(a + 2 * k as u64);
                 prime_bits &= prime_bits - 1; // clsb
             }
         }
@@ -270,7 +270,7 @@ pub fn eratosthenes (limit: usize) -> Vec<usize> {
 }
 
 pub struct Primes {
-    buf: Vec<usize>,
+    buf: Vec<u64>,
     start: usize,
     end: usize,
 }
@@ -290,7 +290,7 @@ impl Default for Primes {
 }
 
 impl Iterator for Primes {
-    type Item = usize;
+    type Item = u64;
 
     fn next (&mut self) -> Option<Self::Item> {
         if self.start < self.end {
@@ -311,7 +311,7 @@ impl DoubleEndedIterator for Primes {
     fn next_back (&mut self) -> Option<Self::Item> {
         if self.start < self.end {
             self.end -= 1;
-            Some(self.buf[self.end])
+            Some(self.buf[self.end as usize])
         }
         else { None }
     }
@@ -323,7 +323,7 @@ impl ExactSizeIterator for Primes {}
 mod tests {
     use super::*;
 
-    const PRIMES: [usize; 58] = [
+    const PRIMES: [u64; 58] = [
         2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31,
         37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79,
         83, 89, 97, 101, 103, 107, 109, 113, 127, 131,

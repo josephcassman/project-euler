@@ -36,10 +36,10 @@ pub fn run () {
     println!("\niterative method: {}\n", iterative());
 }
 
-fn iterative () -> usize {
+fn iterative () -> u64 {
     let primes = &eratosthenes(10_000_000);
     for a in Triangle::default().skip(1) {
-        let n = a as usize;
+        let n = a;
         if tau(n, primes) > 500 {
             return n;
         }

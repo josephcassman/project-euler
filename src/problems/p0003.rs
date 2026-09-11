@@ -16,8 +16,8 @@ pub fn run () {
     println!("\niterative method: {}\n", iterative());
 }
 
-fn iterative () -> usize {
-    const N: usize = 600_851_475_143;
+fn iterative () -> u64 {
+    const N: u64 = 600_851_475_143;
     let mut r = 0;
 
     let a = (N as f64).sqrt() as usize;

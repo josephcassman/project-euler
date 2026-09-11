@@ -17,7 +17,7 @@ pub fn run () {
     println!("\niterative method: {}\n", iterative());
 }
 
-fn iterative () -> usize {
+fn iterative () -> u64 {
     let mut sum = 0;
 
     for a in Primes::new(2_000_000) {

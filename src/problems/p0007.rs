@@ -18,7 +18,7 @@ pub fn run () {
     println!("\niterative method: {}\n", sieve());
 }
 
-fn sieve () -> usize {
+fn sieve () -> u64 {
     // Get the number at index 10_000 since
     // Iterator::nth uses zero-based indexing.
     Primes::new(10_000_000).nth(10_000).unwrap()

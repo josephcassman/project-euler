@@ -1,16 +1,19 @@
 // Copyright 2026 Joseph Cassman
 // SPDX-License-Identifier: Apache-2.0
 
-/// 𝜏(𝑛) or 𝜎₀(𝑛)
-/// the number of divisors of 𝑛
-///
-/// Factorize by trial division.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct PrimeFactor {
+    p: u64,
+    count: usize,
+}
+
+/// Prime factors of 𝑛
 /// req: primes contains primes at least up to √𝑛
 ///
-pub fn tau (mut n: usize, primes: &[usize]) -> usize {
+pub fn factorize (mut n: u64, primes: &[u64]) -> Vec<PrimeFactor> {
     assert!(n > 0);
 
-    let mut r = 1;
+    let mut r = Vec::new();
 
     for &p in primes {
         // Only necessary to test 𝑝 ≤ √𝑛.
@@ -19,21 +22,32 @@ pub fn tau (mut n: usize, primes: &[usize]) -> usize {
         // Most 𝑝 do not divide 𝑛 so skip 𝑝 for which 𝑝 ∤ 𝑛.
         if n % p == 0 {
             // Determine the largest 𝑏 such that 𝑝ᵇ ∣ 𝑛.
-            let mut b = 1;
-            n /= p;
+            let mut count = 0;
             while n % p == 0 {
-                b += 1;
+                count += 1;
                 n /= p;
             }
-            r *= b + 1;
+            r.push(PrimeFactor { p, count });
         }
     }
 
-    // Any value 𝑛 greater than 1 must be prime
-    // so it has two factors: itself and 1.
-    if n > 1 { r *= 2; }
+    // A remaining value of 𝑛 greater than 1 must be prime
+    if n > 1 {
+        r.push(PrimeFactor { p: n, count: 1 });
+    }
 
     r
+}
+
+/// 𝜏(𝑛) or 𝜎₀(𝑛)
+/// the number of divisors of 𝑛
+///
+/// Factorize by trial division.
+/// req: primes contains primes at least up to √𝑛
+///
+pub fn tau (n: u64, primes: &[u64]) -> usize {
+    assert!(n > 0);
+    factorize(n, primes).iter().fold(1, |acc, x| acc * (x.count + 1))
 }
 
 /// 𝜎(𝑛) or 𝜎₁(𝑛)
@@ -57,21 +71,32 @@ pub fn sigma_sieve (limit: usize) -> Vec<u64> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    const TAU: [usize; 100] = [
-        1, 2, 2, 3, 2, 4, 2, 4, 3, 4, 2, 6, 2, 4, 4, 5, 2, 6, 2, 6, 4, 4, 2, 8,
-        3, 4, 4, 6, 2, 8, 2, 6, 4, 4, 4, 9, 2, 4, 4, 8, 2, 8, 2, 6, 6, 4, 2, 10,
-        3, 6, 4, 6, 2, 8, 4, 8, 4, 4, 2, 12, 2, 4, 6, 7, 4, 8, 2, 6, 4, 8, 2, 12,
-        2, 4, 6, 6, 4, 8, 2, 10, 5, 4, 2, 12, 4, 4, 4, 8, 2, 12, 4, 6, 4, 4, 4,
-        12, 2, 6, 6, 9,
-    ];
+    use crate::etc::sequences::primes::eratosthenes;
 
     #[test]
-    fn test () {
-        use crate::etc::sequences::primes::eratosthenes;
+    fn test_factorize () {
+        fn pf (p: u64, count: usize) -> PrimeFactor { PrimeFactor { p, count } }
 
         let primes = &eratosthenes(100);
-        let actual: Vec<_> = (1..=100).map(|n| tau(n, primes)).collect();
-        assert_eq!(actual, TAU);
+        assert_eq!(factorize(2, primes), vec![pf(2, 1)]);
+        assert_eq!(factorize(3, primes), vec![pf(3, 1)]);
+        assert_eq!(factorize(12, primes), vec![pf(2, 2), pf(3, 1)]);
+        assert_eq!(factorize(30, primes), vec![pf(2, 1), pf(3, 1), pf(5, 1)]);
+        assert_eq!(factorize(1960, primes), vec![pf(2, 3), pf(5, 1), pf(7, 2)]);
+    }
+
+    #[test]
+    fn test_tau () {
+        let expected = [
+            1, 2, 2, 3, 2, 4, 2, 4, 3, 4, 2, 6, 2, 4, 4, 5, 2, 6, 2, 6, 4, 4, 2, 8,
+            3, 4, 4, 6, 2, 8, 2, 6, 4, 4, 4, 9, 2, 4, 4, 8, 2, 8, 2, 6, 6, 4, 2, 10,
+            3, 6, 4, 6, 2, 8, 4, 8, 4, 4, 2, 12, 2, 4, 6, 7, 4, 8, 2, 6, 4, 8, 2, 12,
+            2, 4, 6, 6, 4, 8, 2, 10, 5, 4, 2, 12, 4, 4, 4, 8, 2, 12, 4, 6, 4, 4, 4,
+            12, 2, 6, 6, 9,
+        ];
+
+        let primes = &eratosthenes(100);
+        let actual: Vec<_> = (1u64..=100u64).map(|n| tau(n, primes)).collect();
+        assert_eq!(actual, expected);
     }
 }
