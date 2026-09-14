@@ -84,7 +84,12 @@ pub const fn lcm (a: u64, b: u64) -> u64 {
 }
 
 /// 𝑛!
-pub fn factorial (n: u64) -> BigUint {
+pub fn factorial (n: u64) -> u64 {
+    (1..=n).fold(1, |acc, x| acc * x)
+}
+
+/// 𝑛! multiple-precision
+pub fn factorial_mp (n: u64) -> BigUint {
     (1..=n).fold(BigUint::one(), |acc, x| acc * x)
 }
 
@@ -110,15 +115,26 @@ mod tests {
 
     #[test]
     fn test_factorial () {
-        assert_eq!(factorial(0), BigUint::one());
-        assert_eq!(factorial(1), BigUint::one());
-        assert_eq!(factorial(2), BigUint::from_str("2").unwrap());
-        assert_eq!(factorial(3), BigUint::from_str("6").unwrap());
-        assert_eq!(factorial(4), BigUint::from_str("24").unwrap());
-        assert_eq!(factorial(5), BigUint::from_str("120").unwrap());
-        assert_eq!(factorial(6), BigUint::from_str("720").unwrap());
-        assert_eq!(factorial(7), BigUint::from_str("5040").unwrap());
-        assert_eq!(factorial(8), BigUint::from_str("40320").unwrap());
-        assert_eq!(factorial(20), BigUint::from_str("2432902008176640000").unwrap());
+        assert_eq!(factorial(0), 1);
+        assert_eq!(factorial(1), 1);
+        assert_eq!(factorial(2), 2);
+        assert_eq!(factorial(3), 6);
+        assert_eq!(factorial(4), 24);
+        assert_eq!(factorial(5), 120);
+        assert_eq!(factorial(6), 720);
+        assert_eq!(factorial(7), 5040);
+        assert_eq!(factorial(8), 40320);
+        assert_eq!(factorial(20), 2432902008176640000);
+
+        assert_eq!(factorial_mp(0), BigUint::one());
+        assert_eq!(factorial_mp(1), BigUint::one());
+        assert_eq!(factorial_mp(2), BigUint::from_str("2").unwrap());
+        assert_eq!(factorial_mp(3), BigUint::from_str("6").unwrap());
+        assert_eq!(factorial_mp(4), BigUint::from_str("24").unwrap());
+        assert_eq!(factorial_mp(5), BigUint::from_str("120").unwrap());
+        assert_eq!(factorial_mp(6), BigUint::from_str("720").unwrap());
+        assert_eq!(factorial_mp(7), BigUint::from_str("5040").unwrap());
+        assert_eq!(factorial_mp(8), BigUint::from_str("40320").unwrap());
+        assert_eq!(factorial_mp(20), BigUint::from_str("2432902008176640000").unwrap());
     }
 }

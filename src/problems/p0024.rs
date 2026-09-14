@@ -19,7 +19,7 @@
 
 use num_traits::ToPrimitive;
 use crate::etc::permute;
-use crate::etc::discrete_math::factorial;
+use crate::etc::discrete_math::factorial_mp;
 
 pub fn run () {
     println!("\niterative method: {:?}", iterative());
@@ -77,7 +77,7 @@ fn calculation () -> Vec<u64> {
     let mut rem = 1_000_000 - 1;
 
     for i in 1..=10 {
-        let w = factorial(10 - i).to_usize().unwrap();
+        let w = factorial_mp(10 - i).to_usize().unwrap();
         let c = rem / w;
         rem %= w;
 

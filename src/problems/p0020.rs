@@ -15,14 +15,14 @@
 //! Find the sum of the digits in the number 100!.
 //!
 
-use crate::etc::discrete_math::factorial;
+use crate::etc::discrete_math::factorial_mp;
 
 pub fn run () {
     println!("\ncalculation method: {}\n", calculation());
 }
 
 fn calculation () -> u64 {
-    factorial(100)
+    factorial_mp(100)
     .to_string()
     .bytes()
     .map(|x| (x - b'0') as u64)

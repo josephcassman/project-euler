@@ -28,7 +28,7 @@
 //!
 
 use num_bigint::BigUint;
-use crate::etc::discrete_math::factorial;
+use crate::etc::discrete_math::factorial_mp;
 
 pub fn run () {
     println!("\nbrute-force method: {}", brute_force());
@@ -52,8 +52,8 @@ pub fn run () {
 ///    𝐶(𝑛, 𝑘) = 𝑛! ∕ 𝑘!·(𝑛 - 𝑘)!
 ///
 fn brute_force () -> BigUint {
-    let twenty = factorial(20);
-    factorial(40) / (twenty.clone() * twenty)
+    let twenty = factorial_mp(20);
+    factorial_mp(40) / (twenty.clone() * twenty)
 }
 
 ///
