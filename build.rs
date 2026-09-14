@@ -1,6 +1,6 @@
-use std::{env, fs};
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
+use std::{env, fs};
 
 ///
 /// Automate the selection of modules in main.rs.
@@ -32,9 +32,7 @@ fn main () {
 
     let mut registry = String::from("problems!(\n");
     for (number, path) in problems {
-        registry.push_str(&format!(
-            "    ({number}, project_euler::problems::{path}::run),\n"
-        ));
+        registry.push_str(&format!("    ({number}, crate::problems::{path}::run),\n"));
     }
     registry.push_str(");\n");
     fs::write(out_dir.join("problem_registry.rs"), registry).unwrap();
@@ -99,10 +97,7 @@ fn render_modules (tree: &ModuleTree, depth: usize) -> String {
 }
 
 fn rust_string (path: &Path) -> String {
-    let path = path
-        .canonicalize()
-        .unwrap()
-        .to_string_lossy()
-        .replace('\\', "\\\\");
+    let path = env::current_dir().unwrap().join(path);
+    let path = path.to_string_lossy().replace('\\', "\\\\");
     format!("\"{path}\"")
 }
