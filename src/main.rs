@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use clap::Parser;
-use project_euler::problems::*;
 
 fn main () {
     let args = Args::parse();
@@ -29,28 +28,11 @@ struct Args {
 }
 
 macro_rules! problems {
-    ($(($number:literal, $module:ident)),* $(,)?) => {
+    ($(($number:literal, $run:path)),* $(,)?) => {
         const PROBLEMS: &[(u32, fn())] = &[
-            $(($number, $module::run)),*
+            $(($number, $run)),*
         ];
     };
 }
 
-problems!(
-    (1, p0001), (2, p0002), (3, p0003), (4, p0004), (5, p0005), (6, p0006), (7, p0007), (8, p0008), (9, p0009), (10, p0010),
-    (11, p0011), (12, p0012), (13, p0013), (14, p0014), (15, p0015), (16, p0016), (17, p0017), (18, p0018), (19, p0019),
-    (20, p0020),
-    (21, p0021),
-    (22, p0022),
-    (23, p0023),
-    (24, p0024),
-    (25, p0025),
-    (26, p0026),
-    (27, p0027),
-    (28, p0028),
-    (29, p0029),
-    (30, p0030),
-    (31, p0031),
-    (32, p0032),
-    (33, p0033),
-);
+include!(concat!(env!("OUT_DIR"), "/problem_registry.rs"));
