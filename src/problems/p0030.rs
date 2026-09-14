@@ -25,11 +25,6 @@ pub fn run () {
     println!("\niterative method: {:?}\n", iterative());
 }
 
-///
-/// run with release mode on:
-///
-///    cargo run --release -- 30
-///
 fn iterative () -> u64 {
     let mut r: u64 = 0;
 

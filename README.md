@@ -5,5 +5,5 @@ Each problem is placed in a separate file in the `src/problems` folder. The form
 Use the following command to execute problem 1:
 
 ```
-cargo run -- 1
+cargo run --release -- 1
 ```
