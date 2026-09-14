@@ -12,26 +12,25 @@ fn main () {
     }
 }
 
-fn run (problem: u32) {
-    if let Some((_, run)) = PROBLEMS.iter().find(|(x, _)| *x == problem) {
-        run();
-    }
-    else {
-        eprintln!("\nProblem '{}' does not have an implementation\n", problem)
-    }
-}
-
 #[derive(Parser)]
 #[command(name = "euler")]
 struct Args {
     problem: String,
 }
 
+///
+/// This macro is used by the build script build.rs
+/// to automate the mapping of problem numbers provided
+/// on the command line to corresponding problem code.
+///
 macro_rules! problems {
     ($(($number:literal, $run:path)),* $(,)?) => {
-        const PROBLEMS: &[(u32, fn())] = &[
-            $(($number, $run)),*
-        ];
+        fn run (problem: u32) {
+            match problem {
+                $($number => $run(),)*
+                problem => eprintln!("\nProblem '{}' does not have an implementation\n", problem),
+            }
+        }
     };
 }
 
