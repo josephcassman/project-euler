@@ -35,6 +35,11 @@ pub fn run () {
     println!("\nbrute-force method: {:?}\n", brute_force());
 }
 
+///
+/// run with release mode on:
+///
+///    cargo run --release -- 27
+///
 fn brute_force () -> i64 {
     #[inline(always)]
     fn f (n: i64, a: i64, b: i64) -> i64 {
