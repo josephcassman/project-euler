@@ -21,7 +21,7 @@
 //!
 
 use std::collections::HashSet;
-use crate::etc::permute;
+use crate::etc::{join_digits, permute};
 
 pub fn run () {
     println!("\niterative method: {:?}\n", iterative());
@@ -44,9 +44,9 @@ fn iterative () -> u64 {
             let middle = &digits[i..j];
             let right = &digits[j..];
 
-            let a = number(left);
-            let b = number(middle);
-            let c = number(right);
+            let a = join_digits(left);
+            let b = join_digits(middle);
+            let c = join_digits(right);
 
             if a * b == c {
                 numbers.insert(c);
@@ -55,9 +55,4 @@ fn iterative () -> u64 {
     }
 
     numbers.iter().sum()
-}
-
-#[inline(always)]
-fn number (digits: &[u8]) -> u64 {
-    digits.iter().fold(0u64, |acc, &x| acc * 10 + x as u64)
 }

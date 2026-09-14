@@ -49,6 +49,23 @@ pub fn permute (a: &mut [u8]) -> bool {
     }
 }
 
+#[inline(always)]
+pub fn join_digits (digits: &[u8]) -> u64 {
+    digits.iter().fold(0u64, |acc, &x| acc * 10 + x as u64)
+}
+
+#[inline(always)]
+pub fn split_digits (mut n: u64) -> Vec<u8> {
+    if n == 0 { return vec![0]; }
+    let mut r = Vec::new();
+    while n > 0 {
+        r.push((n % 10) as u8);
+        n /= 10;
+    }
+    r.reverse();
+    r
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -103,9 +120,50 @@ mod tests {
 
         assert!(!permute(&mut e));
         assert_eq!(e, [1, 2, 3]);
+    }
 
+    #[test]
+    fn test_join_digits () {
+        assert_eq!(join_digits(&[]), 0);
+        assert_eq!(join_digits(&[0]), 0);
 
+        assert_eq!(join_digits(&[1]), 1);
+        assert_eq!(join_digits(&[2]), 2);
+        assert_eq!(join_digits(&[3]), 3);
+        assert_eq!(join_digits(&[4]), 4);
+        assert_eq!(join_digits(&[5]), 5);
+        assert_eq!(join_digits(&[6]), 6);
+        assert_eq!(join_digits(&[7]), 7);
+        assert_eq!(join_digits(&[8]), 8);
+        assert_eq!(join_digits(&[9]), 9);
 
+        assert_eq!(join_digits(&[0, 0]), 0);
+        assert_eq!(join_digits(&[0, 0, 1]), 1);
+        assert_eq!(join_digits(&[1, 0, 2]), 102);
+        assert_eq!(join_digits(&[1, 0]), 10);
 
+        assert_eq!(join_digits(&[9, 8, 7, 6, 5, 4, 3, 2, 1, 0]), 9876543210);
+    }
+
+    #[test]
+    fn test_split_digits () {
+        assert_eq!(split_digits(0), vec![0]);
+
+        assert_eq!(split_digits(1), vec![1]);
+        assert_eq!(split_digits(2), vec![2]);
+        assert_eq!(split_digits(3), vec![3]);
+        assert_eq!(split_digits(4), vec![4]);
+        assert_eq!(split_digits(5), vec![5]);
+        assert_eq!(split_digits(6), vec![6]);
+        assert_eq!(split_digits(7), vec![7]);
+        assert_eq!(split_digits(8), vec![8]);
+        assert_eq!(split_digits(9), vec![9]);
+
+        assert_eq!(split_digits(10), vec![1, 0]);
+        assert_eq!(split_digits(100), vec![1, 0, 0]);
+        assert_eq!(split_digits(102), vec![1, 0, 2]);
+        assert_eq!(split_digits(10), vec![1, 0]);
+
+        assert_eq!(split_digits(9876543210), vec![9, 8, 7, 6, 5, 4, 3, 2, 1, 0]);
     }
 }
