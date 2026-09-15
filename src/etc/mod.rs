@@ -1,6 +1,7 @@
 // Copyright 2026 Joseph Cassman
 // SPDX-License-Identifier: Apache-2.0
 
+pub mod bcd;
 pub mod discrete_math;
 pub mod factorization;
 pub mod sequences;
