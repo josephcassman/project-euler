@@ -59,8 +59,8 @@ fn iterative () -> u64 {
 /// By defining E(n) as F(3 * n), to represent the even sequence,
 /// we have the following:
 ///
-///    F(3 * n) = 4 * F(3 * n - 3) + F(3 * n - 6)
-///    E(n)    = 4 * E(n - 1) + E(n - 2)
+///    F(3 * n) = 4 * F(3 * n − 3) + F(3 * n − 6)
+///    E(n)    = 4 * E(n − 1) + E(n − 2)
 ///
 fn iterative2 () -> u32 {
     let (mut a, mut b) = (2, 8);
@@ -77,41 +77,41 @@ fn iterative2 () -> u32 {
 /// The recurrence relation E can be used to derive
 /// a closed form formula.
 ///
-///    E(n)     = 4 * E(n - 1) + E(n - 2)                                           # 1
-///    E(n + 1) = 4 * E(n) + E(n - 1)                                               # 2: Move index
-///    4 * E(n) = E(n + 1) - E(n - 1)                                               # 3: Rearrange terms
+///    E(n)     = 4 * E(n − 1) + E(n − 2)                                           # 1
+///    E(n + 1) = 4 * E(n) + E(n − 1)                                               # 2: Move index
+///    4 * E(n) = E(n + 1) − E(n − 1)                                               # 3: Rearrange terms
 ///
 /// Letting S[x] represent summation from 1 to n:
 ///
-///    4 * S[E(k)] = S[E(k + 1) - E(k - 1)]
-///                = (E(2) - E(0)) + (E(3) - E(1)) + ... + (E(n + 1) - E(n - 1))    # 4: Expand
-///                = E(2) - E(0) + E(3) - E(1) + ... + E(n + 1) - E(n - 1)          # 5: Remove parenthesis
-///                = -E(0) - E(1) + E(n + 1) + E(n)                                 # 6: Cancel terms
-///                = E(n + 1) + E(n) - E(1) - E(0)
-///                = E(n + 1) + E(n) - 2 - 0
+///    4 * S[E(k)] = S[E(k + 1) − E(k − 1)]
+///                = (E(2) − E(0)) + (E(3) − E(1)) + ... + (E(n + 1) − E(n − 1))    # 4: Expand
+///                = E(2) − E(0) + E(3) − E(1) + ... + E(n + 1) − E(n − 1)          # 5: Remove parenthesis
+///                = -E(0) − E(1) + E(n + 1) + E(n)                                 # 6: Cancel terms
+///                = E(n + 1) + E(n) − E(1) − E(0)
+///                = E(n + 1) + E(n) − 2 − 0
 ///
-///    S = (E(n + 1) + E(n) - 2) / 4                                                # 7: Solve for S
+///    S = (E(n + 1) + E(n) − 2) / 4                                                # 7: Solve for S
 ///
 /// We can use the Fibonacci definition to derive
 /// a replacement for E(n) which is the same as F(3 * n):
 ///
-///    F(k)         = F(k - 1) + F(k - 2)
+///    F(k)         = F(k − 1) + F(k − 2)
 ///    F(3 * n + 2) = F(3 * n + 1) + F(3 * n)                                       # 8: Substitute 3 * n + 2 for k
-///    F(3 * n)     = F(3 * n + 2) - F(3 * n + 1)                                   # 9: Rearrange terms
+///    F(3 * n)     = F(3 * n + 2) − F(3 * n + 1)                                   # 9: Rearrange terms
 ///
 /// Summarizing:
 ///
 ///    E(n + 1) = F(3 * n + 3)
 ///             = F(3 * n + 2) + F(3 * n + 1)
 ///    E(n)     = F(3 * n)
-///             = F(3 * n + 2) - F(3 * n + 1)
+///             = F(3 * n + 2) − F(3 * n + 1)
 ///
 /// Finalizing the transformation:
 ///
-///    S = (E(n + 1) + E(n) - 2) / 4                                                # 10: Restate 7
-///      = (F(3 * n + 2) + F(3 * n + 1) + F(3 * n + 2) - F(3 * n + 1) - 2) / 4      # 11: Substitute
-///      = (2 * F(3 * n + 2) - 2) / 4                                               # 12: Reduce
-///      = (F(3 * n + 2) - 1) / 2                                                   # 13: Simplify
+///    S = (E(n + 1) + E(n) − 2) / 4                                                # 10: Restate 7
+///      = (F(3 * n + 2) + F(3 * n + 1) + F(3 * n + 2) − F(3 * n + 1) − 2) / 4      # 11: Substitute
+///      = (2 * F(3 * n + 2) − 2) / 4                                               # 12: Reduce
+///      = (F(3 * n + 2) − 1) / 2                                                   # 13: Simplify
 ///
 /// Since E(11) = 3_524_578 <= 4_000_000 < E(12) = 14_930_352, we must choose S(11).
 ///

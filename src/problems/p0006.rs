@@ -46,21 +46,21 @@ fn iterative () -> u64 {
 ///
 /// Let ∑[a, b, A] be the summation from a to b for the expression A.
 ///
-///    n³ = ∑[1, n, k³] - ∑[1, n - 1, k³]
-///       = ∑[1, n, k³] - ∑[2, n, (k - 1)³]                # 1: Shift the second term by one
-///       = ∑[1, n, k³] - ∑[1, n, (k - 1)³]                # 2: Can include index 1 since (1 - 1)³ == 0
-///       = ∑[1, n, k³ - (k - 1)³]                         # 3: Combine sigmas
-///       = ∑[1, n, k³ - (k³ - 3·k² + 3·k - 1)]            # 4: Expand
-///       = ∑[1, n, 3·k² - 3·k + 1]                        # 5: Simplify
-///       = 3·∑[1, n, k²] - 3·∑[1, n, k] + ∑[1, n, 1]      # 6: Separate sigmas
+///    n³ = ∑[1, n, k³] − ∑[1, n − 1, k³]
+///       = ∑[1, n, k³] − ∑[2, n, (k − 1)³]                # 1: Shift the second term by one
+///       = ∑[1, n, k³] − ∑[1, n, (k − 1)³]                # 2: Can include index 1 since (1 - 1)³ == 0
+///       = ∑[1, n, k³ − (k − 1)³]                         # 3: Combine sigmas
+///       = ∑[1, n, k³ − (k³ − 3·k² + 3·k − 1)]            # 4: Expand
+///       = ∑[1, n, 3·k² − 3·k + 1]                        # 5: Simplify
+///       = 3·∑[1, n, k²] − 3·∑[1, n, k] + ∑[1, n, 1]      # 6: Separate sigmas
 ///
 /// Now we clean up the isolation of the quadratic form.
 ///
-///    3·∑[1, n, k²] = n³ + 3·∑[1, n, k] - ∑[1, n, 1]      # 7: Rearrange terms
-///    3·∑[1, n, k²] = n³ + 3·(n·(n+1)/2) - n              # 8: Replace the last two terms with their closed forms
-///    3·∑[1, n, k²] = (2·n³ + 3·n·(n+1) - 2·n)/2          # 9: Combine into a single term
+///    3·∑[1, n, k²] = n³ + 3·∑[1, n, k] − ∑[1, n, 1]      # 7: Rearrange terms
+///    3·∑[1, n, k²] = n³ + 3·(n·(n+1)/2) − n              # 8: Replace the last two terms with their closed forms
+///    3·∑[1, n, k²] = (2·n³ + 3·n·(n+1) − 2·n)/2          # 9: Combine into a single term
 ///
-///    ∑[1, n, k²] = (2·n³ + 3·n·(n+1) - 2·n)/6            # 10: Divide by three
+///    ∑[1, n, k²] = (2·n³ + 3·n·(n+1) − 2·n)/6            # 10: Divide by three
 ///    ∑[1, n, k²] = n·(n + 1)(2·n + 1)/6                  # 11: Factorize the numerator
 ///
 fn formula () -> u64 {

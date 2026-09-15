@@ -12,7 +12,7 @@ pub type Triple = (u64, u64, u64);
 ///
 /// Then the triple (a, b, c) is calculated as follows:
 ///
-///    a = m² - n²
+///    a = m² − n²
 ///    b = 2·m·n
 ///    c = m² + n²
 ///
@@ -33,22 +33,22 @@ impl PrimitivePythagoreanTriples {
         // b is small if n is small. This means max(a, b)
         // is found when a and b are roughly equal:
         //
-        //    m² - n² ≈ 2·m·n                          # approximation
+        //    m² − n² ≈ 2·m·n                          # approximation
         //
-        //    m² - n² = 2·m·n                          # 1: Consider the approximation as an equation
-        //    n² + 2·m·n - m² = 0                      # 2: Rearrange terms
-        //    n²/m² + 2·m·n/m² - m²/m² = 0             # 3: Multiply by 1/m²
-        //    n²/m² + 2·n/m - 1 = 0                    # 4: Simplify
-        //    x² + 2·x - 1 = 0                         # 5: Let x = n/m
+        //    m² − n² = 2·m·n                          # 1: Consider the approximation as an equation
+        //    n² + 2·m·n − m² = 0                      # 2: Rearrange terms
+        //    n²/m² + 2·m·n/m² − m²/m² = 0             # 3: Multiply by 1/m²
+        //    n²/m² + 2·n/m − 1 = 0                    # 4: Simplify
+        //    x² + 2·x − 1 = 0                         # 5: Let x = n/m
         //    x = -1 ± √2                              # 6: Solve using the quadratic formula
         //    x = -1 + √2                              # 7: Discard negative root since m > 0 and n ≥ 1
-        //    n/m = √2 - 1                             # 8: Substitute back in for x
-        //    n = (√2 - 1)·m                           # 9: Solve for n
+        //    n/m = √2 − 1                             # 8: Substitute back in for x
+        //    n = (√2 − 1)·m                           # 9: Solve for n
         //
-        //    n ≈ (√2 - 1)·m ≈ 0.41421·m               # 10: Approximate n
+        //    n ≈ (√2 − 1)·m ≈ 0.41421·m               # 10: Approximate n
         //
         //    b = 2·m·n                                # 11: Definition of b
-        //      ≈ 2·(√2 - 1)·m² ≡ A ≈ 0.82843·m²       # 12: Use the approximation from 10
+        //      ≈ 2·(√2 − 1)·m² ≡ A ≈ 0.82843·m²       # 12: Use the approximation from 10
         //
         // So once A is greater than or equal to the limit value,
         // no value for n can keep a and b under the limit.
@@ -56,8 +56,8 @@ impl PrimitivePythagoreanTriples {
         // inequalities means b is greater than the limit.
         //
         //    A > LIMIT
-        //    2·(√2 - 1)·m² > LIMIT
-        //    m > √(LIMIT/(2·(√2 - 1))) ≈ 1.09868·√LIMIT
+        //    2·(√2 − 1)·m² > LIMIT
+        //    m > √(LIMIT/(2·(√2 − 1))) ≈ 1.09868·√LIMIT
         //
         let max_m = ((limit as f64) / (2.0 * (core::f64::consts::SQRT_2 - 1.0))).sqrt().floor() as u64;
 

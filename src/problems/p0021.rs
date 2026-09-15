@@ -28,7 +28,7 @@ pub fn run () {
 fn iterative () -> u64 {
     let sigma = sigma_sieve(1_000_000);
 
-    // proper divisor sum (n) = sigma(n) - n
+    // proper divisor sum (n) = sigma(n) − n
     let proper_divisor_sum = |x: usize| -> usize {
         if x >= sigma.len() { 0 }
         else { (sigma[x] as usize).saturating_sub(x) }

@@ -11,7 +11,7 @@ use num_traits::One;
 ///  1. gcd(a, 0) = a
 ///  2. gcd(2 * a, 2 * b) = 2 * gcd(a, b)
 ///  3. gcd(a, 2 * b) = gcd(a, b) if a is odd
-///  4. gcd(a, b) = gcd(a, b - a) if a <= b
+///  4. gcd(a, b) = gcd(a, b − a) if a <= b
 ///
 /// Since gcd is commutative, the above identities still apply
 /// if the operands are swapped.
@@ -38,7 +38,7 @@ pub const fn gcd (mut a: u64, mut b: u64) -> u64 {
     //
     //    while b != 0
     //       if a > b { swap(a, b) }
-    //       b = b - a
+    //       b = b − a
     //
     // Stein's algorithm includes a key optimization:
     // because a and b are odd, b - a is always even.

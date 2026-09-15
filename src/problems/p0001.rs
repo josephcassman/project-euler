@@ -42,9 +42,9 @@ fn iterative () -> u32 {
 /// we have the inequality m * k < n. Since these values
 /// are integers, solving for 'm, we have the following:
 ///
-///    m * k ≤ n - 1
-///    m ≤ (n - 1) / k
-///    m = floor((n - 1) / k)
+///    m * k ≤ n − 1
+///    m ≤ (n − 1) / k
+///    m = floor((n − 1) / k)
 ///
 /// Then call 'U the triangle function shifted by 'k:
 ///
@@ -53,7 +53,7 @@ fn iterative () -> u32 {
 /// Finally, common multiples must be removed since
 /// they have already been included:
 ///
-///    sum = U(1000, 3) + U(1000, 5) - U(1000, 15)
+///    sum = U(1000, 3) + U(1000, 5) − U(1000, 15)
 ///
 fn formula () -> u32 {
     fn u (k: u32) -> u32 {

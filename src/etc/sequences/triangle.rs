@@ -4,9 +4,10 @@
 //!
 //! Sequence of Triangle numbers
 //!
-//!    T(0) = 0
-//!    T(1) = 0 + 1
-//!    T(n) = 0 + 1 + ... + (n - 1) + n
+//!    𝑇(0) = 0
+//!    𝑇(1) = 0 + 1
+//!    𝑇(𝑛) = 0 + 1 + ... + (𝑛 − 1) + 𝑛
+//!         = 𝑇(𝑛 − 1) + 𝑛
 //!
 //!    0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66,
 //!    78, 91, 105, 120, 136, 153, 171, 190, 210,
@@ -14,9 +15,10 @@
 //!
 
 /// nᵗʰ Triangle number using the closed-form formula
+///
+///    𝑇(𝑛) = 𝑛·(𝑛 + 1) / 2
+///
 pub fn triangle (n: u64) -> u64 {
-    // Widen to 128 bits to handle the overflow
-    // from multiplying two 64-bit values.
     let a = n as u128;
     ((a * (a + 1)) >> 1) as u64
 }

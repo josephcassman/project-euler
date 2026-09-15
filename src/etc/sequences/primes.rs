@@ -8,7 +8,7 @@
 /// The more accurate estimate for 𝑛 ≥ 67 comes from
 /// the following inequality published in [1]:
 ///
-///    𝑛 / (ln 𝑛 - 1/2) < 𝜋(𝑛) < 𝑛 / (ln 𝑛 - 3/2)
+///    𝑛 / (ln 𝑛 − 1/2) < 𝜋(𝑛) < 𝑛 / (ln 𝑛 − 3/2)
 ///
 /// [1] Rosser, J. Barkley, and Lowell Schoenfeld.
 ///     "Approximate Formulas for Some Functions of Prime Numbers."
@@ -113,12 +113,12 @@ fn simple (limit: usize) -> Vec<u64> {
     // the capacity for the result.
     //
     // A = the number of even primes = 1
-    // B = odd number count = (limit - 1) / 2 + 1
+    // B = odd number count = (limit − 1) / 2 + 1
     // C = odd non-primes count = sum of bit count of each word in x
-    // D = odd primes = odd number count - odd non-primes count = B - C
+    // D = odd primes = odd number count − odd non-primes count = B − C
     //
     // Capacity = A + D
-    //          = 1 + ((limit - 1) / 2 + 1) - 𝛴 bit-count(x[i])
+    //          = 1 + ((limit − 1) / 2 + 1) − 𝛴 bitcount(x[i])
     //
     let odd_count = (limit - 1) / 2 + 1;
     let composite_count: usize = x.iter().map(|&a| a.count_ones() as usize).sum();
@@ -167,7 +167,7 @@ pub fn eratosthenes (limit: usize) -> Vec<u64> {
     // the segment by subtracting 𝑎):
     //
     //    number = { 2·𝑘 + 1 | 𝑘 ∈ ℤ ∧ 𝑘 ≥ 0 }
-    //    k = (number - a) / 2 (integral division)
+    //    k = (number − a) / 2 (integral division)
     //    k / 64 → word index = index
     //    k % 64 → bit offset = offset
     //
@@ -214,15 +214,15 @@ pub fn eratosthenes (limit: usize) -> Vec<u64> {
                 // interval shown below (rem = 𝑎 mod 𝑝):
                 //
                 //    [preceding multiple, next multiple]  ⇒
-                //    [𝑎 - rem, 𝑎 - rem + 𝑝]               ⇒
-                //    [𝑎 - rem, 𝑎 + (𝑝 - rem)]
+                //    [𝑎 − rem, 𝑎 − rem + 𝑝]               ⇒
+                //    [𝑎 − rem, 𝑎 + (𝑝 − rem)]
                 //
                 // Example. Let 𝑎 = 23 and 𝑝 = 7. This means
                 //   we are starting at 23 and crossing out
                 //   multiples of 7 (composites).
                 //
                 //    rem = 23 mod 7 = 2
-                //    [23 - 2, 23 + (7 - 2)] = [21, 28]
+                //    [23 − 2, 23 + (7 − 2)] = [21, 28]
                 //
                 // The value 28 is the next multiple of 𝑝 = 7.
                 // Because 28 is even, 𝑝 is added to start at 35,

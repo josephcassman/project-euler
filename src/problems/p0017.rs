@@ -80,7 +80,7 @@ fn iterative () -> u64 {
     sum += 7 * 900;
 
     // "and" is used on x % 100 != 0 for x >= 100
-    // 1000 - 100 ⇒ 900 - 9 ⇒ 891
+    // 1000 − 100 ⇒ 900 − 9 ⇒ 891
     sum += (900 - 9) * 3;
 
     sum + 11 // one thousand

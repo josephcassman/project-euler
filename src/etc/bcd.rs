@@ -48,7 +48,7 @@ impl Bcd {
     pub const fn len (&self) -> usize {
         if self.0 == 0 { 1 }
         else {
-            // (63 - msb) / 4 = (15 - ms_nibble)
+            // (63 − msb) / 4 = (15 − ms_nibble)
             16 - (self.0.leading_zeros() as usize / 4)
         }
     }
