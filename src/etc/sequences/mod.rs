@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pub mod fibonacci;
+pub mod pentagonal;
 pub mod primes;
 pub mod pythagorean_triples;
 pub mod triangle;
