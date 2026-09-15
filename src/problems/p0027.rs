@@ -52,7 +52,7 @@ fn brute_force () -> i64 {
         let mut delta = 0;
         for n in 0..1_000 {
             let x = f(n, a, b);
-            if x < 2 || !primes.contains(&(x as u64)) { break; }
+            if x < 2 || !primes.binary_search(&(x as u64)).is_ok() { break; }
             delta += 1;
         }
         if delta > max_length {

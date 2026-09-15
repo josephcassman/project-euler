@@ -31,7 +31,7 @@ fn iterative () -> u64 {
         let mut digits = split_digits(p);
         while rotate(&mut digits) {
             let a = join_digits(&digits);
-            if !primes.contains(&a) { continue 'outer; }
+            if !primes.binary_search(&a).is_ok() { continue 'outer; }
         }
         r += 1;
     }
