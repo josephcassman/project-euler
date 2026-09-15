@@ -17,7 +17,6 @@
 //! Find the next triangle number that is also pentagonal and hexagonal.
 //!
 
-use crate::etc::sequences::triangle::triangle;
 use crate::etc::sequences::pentagonal::Pentagonal;
 use crate::etc::sequences::hexagonal::Hexagonal;
 
@@ -25,15 +24,20 @@ pub fn run () {
     println!("\niterative method: {}\n", iterative());
 }
 
+///
+/// Can just search through the Hexagonal numbers
+/// because all Hexagonal numbers are Triangle numbers:
+///
+///    𝐻(𝑛) = 𝑇(2·𝑛 − 1)
+///
 fn iterative () -> u64 {
     const LIMIT: usize = 32768;
     let p: Vec<_> = Pentagonal::default().take(LIMIT).collect();
-    let h: Vec<_> = Hexagonal::default().take(LIMIT).collect();
 
-    for n in 286.. {
-        let a = triangle(n);
-        if p.binary_search(&a).is_ok() && h.binary_search(&a).is_ok() {
-            return a;
+    // 143 is from the problem definition.
+    for h in Hexagonal::default().skip(143) {
+        if p.binary_search(&h).is_ok() {
+            return h;
         }
     }
 
