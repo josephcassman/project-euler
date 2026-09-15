@@ -98,7 +98,6 @@ mod tests {
     use std::str::FromStr;
     use super::*;
 
-
     #[test]
     fn test_binary_gcd () {
         assert_eq!(gcd(48, 18), 6);
