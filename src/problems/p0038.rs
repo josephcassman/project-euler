@@ -23,6 +23,8 @@
 //! the concatenated product of an integer with (1,2, ..., n) where n > 1?
 //!
 
+use crate::etc::pandigital::is_pandigital_str;
+
 pub fn run () {
     println!("\niterative method: {}\n", iterative());
 }
@@ -41,16 +43,9 @@ pub fn run () {
 fn iterative () -> String {
     for m in (9124..=9876).rev() {
         let a = format!("{}{}", m, 2 * m);
-        if is_pandigital(&a) {
+        if is_pandigital_str(&a) {
             return a;
         }
     }
     String::new()
-}
-
-fn is_pandigital (a: &str) -> bool {
-    if a.len() != 9 || a.contains('0') { return false; }
-    let mut b = a.as_bytes().to_vec();
-    b.sort_unstable();
-    b == b"123456789"
 }

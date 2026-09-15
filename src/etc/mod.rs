@@ -4,6 +4,7 @@
 pub mod bcd;
 pub mod discrete_math;
 pub mod factorization;
+pub mod pandigital;
 pub mod sequences;
 
 pub fn is_palindrome (a: &str) -> bool {
