@@ -30,36 +30,62 @@ fn iterative () -> String {
     .collect()
 }
 
+use std::fmt;
+use std::ops::{Add, AddAssign, Mul, MulAssign};
+
 /// Keep only the last ten digits by reducing
 /// the arithmetic modulo 10¹⁰.
 ///
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-struct Mod10(pub u64);
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct Mod10(pub u64);
 
 impl Mod10 {
     pub const MOD: u64 = 1_00000_00000;
 
     pub fn new (a: u64) -> Self { Self(a % Self::MOD) }
 
-    pub fn add (&mut self, a: Self) {
-        self.0 = (self.0 + a.0) % Self::MOD;
-    }
-
-    pub fn mul (&mut self, a: Self) {
-        let b = (self.0 as u128) * (a.0 as u128);
-        self.0 = (b % (Self::MOD as u128)) as u64;
-    }
-
     pub fn pow (self, a: u64) -> Self {
         let mut r = Self::new(1);
         for _ in 0..a {
-            r.mul(self);
+            r *= self;
         }
         r
     }
 
     pub fn add_pow (&mut self, a: u64) {
-        let b = Self::new(a).pow(a);
-        self.add(b);
+        *self += Self::new(a).pow(a);
+    }
+}
+
+impl Add for Mod10 {
+    type Output = Self;
+    fn add (self, a: Self) -> Self {
+        Self((self.0 + a.0) % Self::MOD)
+    }
+}
+
+impl AddAssign for Mod10 {
+    fn add_assign (&mut self, a: Self) {
+        *self = *self + a;
+    }
+}
+
+impl Mul for Mod10 {
+    type Output = Self;
+    fn mul (self, a: Self) -> Self {
+        let b = (self.0 as u128) * (a.0 as u128);
+        Self((b % (Self::MOD as u128)) as u64)
+    }
+}
+
+impl MulAssign for Mod10 {
+    fn mul_assign (&mut self, a: Self) {
+        *self = *self * a;
+    }
+}
+
+impl fmt::Display for Mod10 {
+    fn fmt (&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:010}", self.0)
     }
 }
