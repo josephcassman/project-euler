@@ -44,10 +44,21 @@ impl Mod10 {
 
     pub fn new (a: u64) -> Self { Self(a % Self::MOD) }
 
-    pub fn pow (self, a: u64) -> Self {
+    ///
+    /// Reduce exponential multiplications by
+    /// iterating over powers of 2.
+    ///
+    /// Example:
+    ///
+    ///    𝑥¹⁵ = 𝑥⁸ ⨯ 𝑥⁴ ⨯ 𝑥² ⨯ 𝑥¹
+    ///
+    pub fn pow (self, mut a: u64) -> Self {
+        let mut x = self;
         let mut r = Self::new(1);
-        for _ in 0..a {
-            r *= self;
+        while a > 0 {
+            if a % 2 == 1 { r *= x; }
+            x *= x;
+            a /= 2;
         }
         r
     }
