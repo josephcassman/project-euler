@@ -48,30 +48,14 @@ pub fn run () {
     f().expect("Problem 59 failed with an error");
 }
 
-///
-/// Try each password p progressively in length
-/// from one character long to the length of the
-/// buffer, and each character in p iterates over
-/// the ASCII interval 33..=126 (b'!'..=b'~'),
-///
-///    Test the password against the cypher by
-///    measuring a heuristic
-///
-///    Select as the password the one that
-///    maximizes the heuristic score.
-///
-/// Heuristic = common words appear
-///
 fn iterative () -> Result<u64, Box<dyn Error>> {
     let data = import_data()?;
-
-    let mut shannon_entropy = [0u64; 256];
     let mut passwords = Password::new(data.len());
 
     while let Some(p) = passwords.next() {
         if !is_english_fast_fail(&p, &data) { continue; }
-        let a = decode(&p, &data);
-        if is_english_text(&a, &mut shannon_entropy) {
+        let a = decode(p, &data);
+        if is_english_text(&a) {
             return Ok(a.iter().map(|&x| x as u64).sum())
         }
     }
@@ -116,31 +100,19 @@ fn is_english_fast_fail (password: &[u8], data: &[u8]) -> bool {
     true
 }
 
-fn is_english_text (data: &[u8], entropy: &mut [u64]) -> bool {
-    let len = data.len() as f64;
+fn is_english_text (data: &[u8]) -> bool {
+    let mut count = 0;
 
-    // Shannon Entropy
-    let mut b = 0.0;
-    entropy.fill(0);
-    for &x in data { entropy[x as usize] += 1; }
-    for &mut x in entropy {
-        if x > 0 {
-            let probability = (x as f64) / len;
-            b -= probability * f64::log2(probability);
+    for x in data.windows(2) {
+        match x {
+            b"th" | b"he" | b"in" | b"er" | b"an" | b"re" | b"on" => count += 1,
+            _ => {}
         }
     }
-    if b > 5.0 { return false; }
 
-    // Bigrams
-    if ((data.windows(2).filter(|&x| x == [b't', b'h']).count() as f64) / len) < 0.01 { return false; }
-    if ((data.windows(2).filter(|&x| x == [b'h', b'e']).count() as f64) / len) < 0.01 { return false; }
-    if ((data.windows(2).filter(|&x| x == [b'i', b'n']).count() as f64) / len) < 0.01 { return false; }
-    if ((data.windows(2).filter(|&x| x == [b'e', b'r']).count() as f64) / len) < 0.01 { return false; }
-    if ((data.windows(2).filter(|&x| x == [b'a', b'n']).count() as f64) / len) < 0.01 { return false; }
-    if ((data.windows(2).filter(|&x| x == [b'r', b'e']).count() as f64) / len) < 0.01 { return false; }
-    if ((data.windows(2).filter(|&x| x == [b'o', b'n']).count() as f64) / len) < 0.01 { return false; }
-
-    true
+    // Bigrams compose roughly 3 to 5 percent
+    // of average English text.
+    count >= 35
 }
 
 ///
