@@ -83,17 +83,14 @@ fn decode (password: &[u8], data: &[u8], output: &mut [u8]) {
 }
 
 fn is_english_fast_fail (password: &[u8], data: &[u8]) -> bool {
-    let len = usize::min(50, data.len());
+    let len = usize::min(30, data.len());
     let mut fail_count = 0;
     for i in 0..len {
         let a = data[i] ^ password[i % password.len()];
-        if a == 0 { return false; } // test for a null byte
-        if !(32..=126).contains(&a) {
-            if a != b'\n' && a != b'\r' && a != b'\t' {
-                fail_count += 1;
-                if fail_count > (len / 7) {
-                    return false;
-                }
+        if a == 0 || (!(32..=126).contains(&a) && a != b'\n' && a != b'\r' && a != b'\t') {
+            fail_count += 1;
+            if fail_count > 2 {
+                return false;
             }
         }
     }
