@@ -82,18 +82,28 @@ fn decode (password: &[u8], data: &[u8], output: &mut [u8]) {
 }
 
 fn is_english_text (data: &[u8]) -> bool {
-    let mut count = 0;
+    let printable_count = data.iter()
+        .filter(|&&x| x.is_ascii_graphic() || x.is_ascii_whitespace())
+        .count();
 
-    for x in data.windows(2) {
-        match x {
-            b"th" | b"he" | b"in" | b"er" | b"an" | b"re" | b"on" => count += 1,
-            _ => {}
-        }
-    }
+    // all characters are printable
+    if printable_count != data.len() { return false; }
 
-    // Bigrams compose roughly 3 to 5 percent
-    // of average English text.
-    count >= 35
+    let len = data.len() as f64;
+
+    // letters and spaces are more common in English text
+    if ((printable_count as f64) / len) < 0.85 { return false; }
+
+    // natural English text averages about 12 to 20% spaces
+    let space_count = data.iter().filter(|&&x| x.is_ascii_whitespace()).count() as f64;
+    if !(0.10..=0.22).contains(&(space_count / len)) { return false; }
+
+    // vowels are common, averaging roughly 25 to 42%
+    let vowel_count = data.iter()
+        .filter(|&&x| matches!(x, b'a' | b'e' | b'i' | b'o' | b'u' | b'A' | b'E' | b'I' | b'O' | b'U')).count() as f64;
+    if !(0.20..=0.45).contains(&(vowel_count / len)) { return false; }
+
+    true
 }
 
 ///
