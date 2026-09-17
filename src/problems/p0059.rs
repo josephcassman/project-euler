@@ -183,6 +183,7 @@ impl Password {
         if !incremented {
             if len < self.limit {
                 self.cur.resize(len + 1, Self::MIN);
+                self.cur.fill(Self::MIN);
             }
             else { self.done = true; }
         }
