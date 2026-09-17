@@ -33,7 +33,7 @@ fn iterative () -> u64 {
 
     for n in 2..10_000_000 {
         let a = phi(n, &primes);
-        if !is_permutation(&n.to_string(), &a.to_string()) { continue; }
+        if !is_permutation(n, a) { continue; }
         let b = (n as f64) / (a as f64);
         if b < min_ratio {
             min_ratio = b;
@@ -44,12 +44,19 @@ fn iterative () -> u64 {
     r
 }
 
-fn is_permutation (a: &str, b: &str) -> bool {
-    let mut x: Vec<char> = a.chars().collect();
-    let mut y: Vec<char> = b.chars().collect();
+fn is_permutation (mut a: u64, mut b: u64) -> bool {
+    let mut count_a = [0u8; 10];
+    let mut count_b = [0u8; 10];
 
-    x.sort_unstable();
-    y.sort_unstable();
+    while a > 0 {
+        count_a[(a % 10) as usize] += 1;
+        a /= 10;
+    }
 
-    x == y
+    while b > 0 {
+        count_b[(b % 10) as usize] += 1;
+        b /= 10;
+    }
+
+    count_a == count_b
 }
