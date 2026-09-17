@@ -52,10 +52,9 @@ fn iterative () -> Result<u64, Box<dyn Error>> {
     let data = import_data()?;
     let mut buf = vec![0u8; data.len()];
 
-    let mut passwords = Password::new(data.len());
+    let mut passwords = Password::new();
 
     while let Some(p) = passwords.next() {
-        if !is_english_fast_fail(&p, &data) { continue; }
         decode(p, &data, &mut buf);
         if is_english_text(&buf) {
             return Ok(buf.iter().map(|&x| x as u64).sum())
@@ -80,31 +79,6 @@ fn decode (password: &[u8], data: &[u8], output: &mut [u8]) {
     for (x, (&a, &b)) in output.iter_mut().zip(data.iter().zip(password.iter().cycle())) {
         *x = a ^ b;
     }
-}
-
-///
-/// count of is_ascii_graphic ⇒ 126 − 32 = 94
-/// count of is_ascii_whitespace ⇒ 5
-///
-/// Each byte has about a 38% chance (99/256) of decrypting
-/// to a printable ASCII character. Extended to 30 bytes
-/// gives the chance of a password being valid as
-///
-///    0.38³⁰ ≈ 2.5e-13
-///
-fn is_english_fast_fail (password: &[u8], data: &[u8]) -> bool {
-    let window_len = usize::min(30, data.len());
-    let password_len = password.len();
-    let mut password_i = 0;
-
-    for &a in &data[..window_len] {
-        let b = a ^ password[password_i];
-        if !b.is_ascii_graphic() && !b.is_ascii_whitespace() { return false; }
-        password_i += 1;
-        if password_i == password_len { password_i = 0; }
-    }
-
-    true
 }
 
 fn is_english_text (data: &[u8]) -> bool {
@@ -153,23 +127,21 @@ fn is_english_text (data: &[u8]) -> bool {
 /// 25  EM     51 3      77  M    103  g
 ///
 
-pub struct Password { cur: Vec<u8>, view: Vec<u8>, limit: usize, done: bool }
+pub struct Password { cur: Vec<u8>, view: Vec<u8>, done: bool }
 impl Password {
-    pub const MIN: u8 = 32; // space
-    pub const MAX: u8 = 126; // ~
+    pub const MIN: u8 = 97;  // a
+    pub const MAX: u8 = 122; // z
 
-    pub fn new (limit: usize) -> Self {
-        let mut cur = Vec::with_capacity(limit);
-        cur.push(Self::MIN);
-        let view = Vec::with_capacity(limit);
-        Self { cur, view, limit, done: false }
+    pub fn new () -> Self {
+        let cur = vec![Self::MIN; 3];
+        let view = vec![0u8; 3];
+        Self { cur, view, done: false }
     }
 
     fn next (&mut self) -> Option<&[u8]> {
         if self.done { return None; }
 
-        self.view.clear();
-        self.view.extend_from_slice(&self.cur);
+        self.view.copy_from_slice(&self.cur);
 
         let len = self.cur.len();
         let mut incremented = false;
@@ -187,13 +159,7 @@ impl Password {
         }
 
         // increase the length if all characters == Self::MAX
-        if !incremented {
-            if len < self.limit {
-                self.cur.resize(len + 1, Self::MIN);
-                self.cur.fill(Self::MIN);
-            }
-            else { self.done = true; }
-        }
+        if !incremented { self.done = true; }
 
         Some(&self.view)
     }
