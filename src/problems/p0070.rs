@@ -45,18 +45,26 @@ fn iterative () -> u64 {
 }
 
 fn is_permutation (mut a: u64, mut b: u64) -> bool {
-    let mut count_a = [0u8; 10];
-    let mut count_b = [0u8; 10];
+    let mut counts = [0i8; 10];
+    let mut len_a = 0;
+    let mut len_b = 0;
 
     while a > 0 {
-        count_a[(a % 10) as usize] += 1;
+        counts[(a % 10) as usize] += 1;
         a /= 10;
+        len_a += 1;
     }
 
     while b > 0 {
-        count_b[(b % 10) as usize] += 1;
+        let c = (b % 10) as usize;
+        counts[c] -= 1;
+
+        // fail fast
+        if counts[c] < 0 { return false; }
+
         b /= 10;
+        len_b += 1;
     }
 
-    count_a == count_b
+    len_a == len_b
 }
