@@ -44,27 +44,27 @@ fn iterative () -> u64 {
     r
 }
 
-fn is_permutation (mut a: u64, mut b: u64) -> bool {
-    let mut counts = [0i8; 10];
-    let mut len_a = 0;
-    let mut len_b = 0;
-
-    while a > 0 {
-        counts[(a % 10) as usize] += 1;
-        a /= 10;
-        len_a += 1;
+#[inline(always)]
+fn is_permutation (a: u64, b: u64) -> bool {
+    ///
+    /// Divide up u64 into 10 6-bit fields
+    /// which store the counts of the digits of 𝑛.
+    ///
+    #[inline(always)]
+    fn hash (mut n: u64) -> u64 {
+        let mut r = 0u64;
+        while n > 0 {
+            r += 1 << ((n % 10) * 6);
+            n /= 10;
+        }
+        r
     }
 
-    while b > 0 {
-        let c = (b % 10) as usize;
-        counts[c] -= 1;
+    // Permutations have the same digit sum.
+    //
+    //    𝑎 ≡ 𝑏 (mod 9)
+    //
+    if a.abs_diff(b) % 9 != 0 { return false; }
 
-        // fail fast
-        if counts[c] < 0 { return false; }
-
-        b /= 10;
-        len_b += 1;
-    }
-
-    len_a == len_b
+    hash(a) == hash(b)
 }
