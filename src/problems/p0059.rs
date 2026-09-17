@@ -52,7 +52,7 @@ fn iterative () -> Result<u64, Box<dyn Error>> {
     let data = import_data()?;
     let mut buf = vec![0u8; data.len()];
     let mut min_score = f64::INFINITY;
-    let mut r = Vec::new();
+    let mut best_password = [0u8; 3];
 
     let mut passwords = Password::new();
     while let Some(p) = passwords.next() {
@@ -60,11 +60,12 @@ fn iterative () -> Result<u64, Box<dyn Error>> {
         let a = chi_squared(&buf);
         if a < min_score {
             min_score = a;
-            r = buf.to_vec();
+            best_password.copy_from_slice(p);
         }
     }
 
-    Ok(r.iter().map(|&x| x as u64).sum())
+    decode(&best_password, &data, &mut buf);
+    Ok(buf.iter().map(|&x| x as u64).sum())
 }
 
 fn import_data () -> Result<Vec<u8>, Box<dyn Error>> {
