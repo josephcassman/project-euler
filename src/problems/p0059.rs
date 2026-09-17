@@ -50,13 +50,15 @@ pub fn run () {
 
 fn iterative () -> Result<u64, Box<dyn Error>> {
     let data = import_data()?;
+    let mut buf = vec![0u8; data.len()];
+
     let mut passwords = Password::new(data.len());
 
     while let Some(p) = passwords.next() {
         if !is_english_fast_fail(&p, &data) { continue; }
-        let a = decode(p, &data);
-        if is_english_text(&a) {
-            return Ok(a.iter().map(|&x| x as u64).sum())
+        decode(p, &data, &mut buf);
+        if is_english_text(&buf) {
+            return Ok(buf.iter().map(|&x| x as u64).sum())
         }
     }
 
@@ -74,12 +76,10 @@ fn import_data () -> Result<Vec<u8>, Box<dyn Error>> {
     Ok(r)
 }
 
-fn decode (password: &[u8], data: &[u8]) -> Vec<u8> {
-    let mut r = data.to_vec();
-    for (a, b) in r.iter_mut().zip(password.iter().cycle()) {
-        *a ^= b;
+fn decode (password: &[u8], data: &[u8], output: &mut [u8]) {
+    for (x, (&a, &b)) in output.iter_mut().zip(data.iter().zip(password.iter().cycle())) {
+        *x = a ^ b;
     }
-    r
 }
 
 fn is_english_fast_fail (password: &[u8], data: &[u8]) -> bool {
