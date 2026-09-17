@@ -40,7 +40,7 @@ use std::fs;
 use std::num::ParseIntError;
 
 pub fn run () {
-    pub fn f () -> Result<(), Box<dyn Error>> {
+    fn f () -> Result<(), Box<dyn Error>> {
         println!("\niterative method: {:?}\n", iterative());
         Ok(())
     }
