@@ -51,17 +51,20 @@ pub fn run () {
 fn iterative () -> Result<u64, Box<dyn Error>> {
     let data = import_data()?;
     let mut buf = vec![0u8; data.len()];
+    let mut min_score = f64::INFINITY;
+    let mut r = Vec::new();
 
     let mut passwords = Password::new();
-
     while let Some(p) = passwords.next() {
         decode(p, &data, &mut buf);
-        if is_english_text(&buf) {
-            return Ok(buf.iter().map(|&x| x as u64).sum())
+        let a = chi_squared(&buf);
+        if a < min_score {
+            min_score = a;
+            r = buf.to_vec();
         }
     }
 
-    Ok(0)
+    Ok(r.iter().map(|&x| x as u64).sum())
 }
 
 fn import_data () -> Result<Vec<u8>, Box<dyn Error>> {
@@ -81,29 +84,62 @@ fn decode (password: &[u8], data: &[u8], output: &mut [u8]) {
     }
 }
 
-fn is_english_text (data: &[u8]) -> bool {
-    let printable_count = data.iter()
-        .filter(|&&x| x.is_ascii_graphic() || x.is_ascii_whitespace())
-        .count();
+const LETTER_FREQUENCY: [f64; 26] = [
+    0.08167, // A ≈  8.167%
+    0.01492, // B ≈  1.492%
+    0.02782, // C ≈  2.782%
+    0.04253, // D ≈  4.253%
+    0.12702, // E ≈ 12.702%
+    0.02228, // F ≈  2.228%
+    0.02015, // G ≈  2.015%
+    0.06094, // H ≈  6.094%
+    0.06966, // I ≈  6.966%
+    0.00153, // J ≈  0.153%
+    0.00772, // K ≈  0.772%
+    0.04025, // L ≈  4.025%
+    0.02406, // M ≈  2.406%
+    0.06749, // N ≈  6.749%
+    0.07507, // O ≈  7.507%
+    0.01929, // P ≈  1.929%
+    0.00095, // Q ≈  0.095%
+    0.05987, // R ≈  5.987%
+    0.06327, // S ≈  6.327%
+    0.09056, // T ≈  9.056%
+    0.02758, // U ≈  2.758%
+    0.00978, // V ≈  0.978%
+    0.02360, // W ≈  2.360%
+    0.00150, // X ≈  0.150%
+    0.01974, // Y ≈  1.974%
+    0.00074, // Z ≈  0.074%
+];
 
-    // all characters are printable
-    if printable_count != data.len() { return false; }
+fn chi_squared (data: &[u8]) -> f64 {
+    let mut counts = [0u32; 26];
+    let mut total = 0usize;
 
-    let len = data.len() as f64;
+    for &a in data {
+        if !a.is_ascii_graphic() && !a.is_ascii_whitespace() { return f64::INFINITY; }
+        if a.is_ascii_alphabetic() {
+            let i = (a.to_ascii_lowercase() - b'a') as usize;
+            counts[i] += 1;
+            total += 1;
+        }
+    }
 
-    // letters and spaces are more common in English text
-    if ((printable_count as f64) / len) < 0.85 { return false; }
+    // natural text tends to be > 70% alphabetic
+    if total < (data.len() * 6 / 10) { return f64::INFINITY; }
 
-    // natural English text averages about 12 to 20% spaces
-    let space_count = data.iter().filter(|&&x| x.is_ascii_whitespace()).count() as f64;
-    if !(0.10..=0.22).contains(&(space_count / len)) { return false; }
+    let n = total as f64;
+    let mut r = 0.0;
 
-    // vowels are common, averaging roughly 25 to 42%
-    let vowel_count = data.iter()
-        .filter(|&&x| matches!(x, b'a' | b'e' | b'i' | b'o' | b'u' | b'A' | b'E' | b'I' | b'O' | b'U')).count() as f64;
-    if !(0.20..=0.45).contains(&(vowel_count / len)) { return false; }
+    for i in 0..26 {
+        let expected = n * LETTER_FREQUENCY[i];
+        let actual = counts[i] as f64;
+        let delta = actual - expected;
+        r += (delta * delta) / expected;
+    }
 
-    true
+    r
 }
 
 ///
