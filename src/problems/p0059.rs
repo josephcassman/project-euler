@@ -82,18 +82,28 @@ fn decode (password: &[u8], data: &[u8], output: &mut [u8]) {
     }
 }
 
+///
+/// count of is_ascii_graphic ⇒ 126 − 32 = 94
+/// count of is_ascii_whitespace ⇒ 5
+///
+/// Each byte has about a 38% chance (99/256) of decrypting
+/// to a printable ASCII character. Extended to 30 bytes
+/// gives the chance of a password being valid as
+///
+///    0.38³⁰ ≈ 2.5e-13
+///
 fn is_english_fast_fail (password: &[u8], data: &[u8]) -> bool {
-    let len = usize::min(30, data.len());
-    let mut fail_count = 0;
-    for i in 0..len {
-        let a = data[i] ^ password[i % password.len()];
-        if a == 0 || (!(32..=126).contains(&a) && a != b'\n' && a != b'\r' && a != b'\t') {
-            fail_count += 1;
-            if fail_count > 2 {
-                return false;
-            }
-        }
+    let window_len = usize::min(30, data.len());
+    let password_len = password.len();
+    let mut password_i = 0;
+
+    for &a in &data[..window_len] {
+        let b = a ^ password[password_i];
+        if !b.is_ascii_graphic() && !b.is_ascii_whitespace() { return false; }
+        password_i += 1;
+        if password_i == password_len { password_i = 0; }
     }
+
     true
 }
 
