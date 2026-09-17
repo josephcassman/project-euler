@@ -70,6 +70,7 @@ fn iterative () -> Result<u64, Box<dyn Error>> {
 
     while let Some(p) = passwords.next() {
         let a = decode(&p, &data);
+        if !is_english_fast_fail(&p, &data) { continue; }
         if is_english_text(&a, &mut shannon_entropy) {
             return Ok(a.iter().map(|&x| x as u64).sum())
         }
@@ -95,6 +96,24 @@ fn decode (password: &[u8], data: &[u8]) -> Vec<u8> {
         *a ^= b;
     }
     r
+}
+
+fn is_english_fast_fail (password: &[u8], data: &[u8]) -> bool {
+    let len = usize::min(50, data.len());
+    let mut fail_count = 0;
+    for i in 0..len {
+        let a = data[i] ^ password[i % password.len()];
+        if a == 0 { return false; } // test for a null byte
+        if !(32..=126).contains(&a) {
+            if a != b'\n' && a != b'\r' && a != b'\t' {
+                fail_count += 1;
+                if fail_count > (len / 7) {
+                    return false;
+                }
+            }
+        }
+    }
+    true
 }
 
 fn is_english_text (data: &[u8], entropy: &mut [u64]) -> bool {
