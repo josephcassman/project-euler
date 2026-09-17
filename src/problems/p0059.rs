@@ -119,13 +119,6 @@ fn is_english_fast_fail (password: &[u8], data: &[u8]) -> bool {
 fn is_english_text (data: &[u8], entropy: &mut [u64]) -> bool {
     let len = data.len() as f64;
 
-    // Check for null values
-    if data.iter().any(|&x| x == 0) { return false; }
-
-    // Percentage of characters in the range 32 to 126
-    let a = data.iter().filter(|&&x| 32 <= x && x <= 126).count() as f64;
-    if a / len < 0.95 { return false; }
-
     // Shannon Entropy
     let mut b = 0.0;
     entropy.fill(0);
