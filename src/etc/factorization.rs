@@ -39,6 +39,21 @@ pub fn factorize (mut n: u64, primes: &[u64]) -> Vec<PrimeFactor> {
     r
 }
 
+/// 𝜑(𝑛)
+/// the number of positive integers ≤ 𝑛
+/// that are relatively prime to 𝑛
+///
+/// req: primes contains primes at least up to √𝑛
+///
+pub fn phi (n: u64, primes: &[u64]) -> u64 {
+    assert!(n > 0);
+    let mut r = n;
+    for p in factorize(n, primes).iter().map(|x| x.p) {
+        r = (r / p) * (p - 1);
+    }
+    r
+}
+
 /// 𝜏(𝑛) or 𝜎₀(𝑛)
 /// the number of divisors of 𝑛
 ///
