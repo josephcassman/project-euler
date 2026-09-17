@@ -66,8 +66,9 @@ fn iterative () -> Result<u64, Box<dyn Error>> {
     let data = import_data()?;
 
     let mut shannon_entropy = [0u64; 256];
+    let mut passwords = Password::new(data.len());
 
-    for p in Password::new(data.len()) {
+    while let Some(p) = passwords.next() {
         let a = decode(&p, &data);
         if is_english_text(&a, &mut shannon_entropy) {
             return Ok(a.iter().map(|&x| x as u64).sum())
@@ -161,35 +162,31 @@ fn is_english_text (data: &[u8], entropy: &mut [u64]) -> bool {
 /// 25  EM     51 3      77  M    103  g
 ///
 
-pub struct Password { cur: Vec<u8>, limit: usize, done: bool }
+pub struct Password { cur: Vec<u8>, view: Vec<u8>, limit: usize, done: bool }
 impl Password {
     pub const MIN: u8 = 32; // space
     pub const MAX: u8 = 126; // ~
 
-    pub fn new (limit: usize) -> Self { Self { cur: vec![Self::MIN], limit, done: false } }
-}
-impl Default for Password { fn default () -> Self { Self::new(usize::MAX) } }
-impl Iterator for Password {
-    type Item = Vec<u8>;
+    pub fn new (limit: usize) -> Self {
+        let mut cur = Vec::with_capacity(limit);
+        cur.push(Self::MIN);
+        let view = Vec::with_capacity(limit);
+        Self { cur, view, limit, done: false }
+    }
 
-    fn next (&mut self) -> Option<Self::Item> {
+    fn next (&mut self) -> Option<&[u8]> {
         if self.done { return None; }
 
-        let r = self.cur.clone();
+        self.view.clear();
+        self.view.extend_from_slice(&self.cur);
+
         let len = self.cur.len();
-
-        if len == self.limit && self.cur.iter().all(|&x| x == Self::MAX) {
-            self.done = true;
-            return Some(r);
-        }
-
         let mut incremented = false;
-        let mut i = self.cur.len();
+        let mut i = len;
         while i > 0 {
             i -= 1;
             if self.cur[i] < Self::MAX {
                 self.cur[i] += 1;
-                // reset the rest to Self::MIN
                 for j in (i + 1)..len {
                     self.cur[j] = Self::MIN;
                 }
@@ -201,11 +198,11 @@ impl Iterator for Password {
         // increase the length if all characters == Self::MAX
         if !incremented {
             if len < self.limit {
-                self.cur = vec![Self::MIN; len + 1];
+                self.cur.resize(len + 1, Self::MIN);
             }
             else { self.done = true; }
         }
 
-        Some(r)
+        Some(&self.view)
     }
 }
