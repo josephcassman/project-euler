@@ -42,7 +42,6 @@ pub fn factorize (mut n: u64, primes: &[u64]) -> Vec<PrimeFactor> {
 /// 𝜑(𝑛)
 /// the number of positive integers ≤ 𝑛
 /// that are relatively prime to 𝑛
-///
 /// req: primes contains primes at least up to √𝑛
 ///
 pub fn phi (n: u64, primes: &[u64]) -> u64 {
@@ -56,8 +55,6 @@ pub fn phi (n: u64, primes: &[u64]) -> u64 {
 
 /// 𝜏(𝑛) or 𝜎₀(𝑛)
 /// the number of divisors of 𝑛
-///
-/// Factorize by trial division.
 /// req: primes contains primes at least up to √𝑛
 ///
 pub fn tau (n: u64, primes: &[u64]) -> usize {
