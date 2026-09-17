@@ -69,8 +69,8 @@ fn iterative () -> Result<u64, Box<dyn Error>> {
     let mut passwords = Password::new(data.len());
 
     while let Some(p) = passwords.next() {
-        let a = decode(&p, &data);
         if !is_english_fast_fail(&p, &data) { continue; }
+        let a = decode(&p, &data);
         if is_english_text(&a, &mut shannon_entropy) {
             return Ok(a.iter().map(|&x| x as u64).sum())
         }
