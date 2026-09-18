@@ -26,8 +26,10 @@ pub fn run () {
 }
 
 fn iterative () -> u64 {
+    let mut partitions = Partitions::new();
+
     for n in 6.. {
-        if p(n) % 1_000_000 == 0 {
+        if partitions.n(n) % 1_000_000 == 0 {
             return n;
         }
     }
@@ -35,6 +37,9 @@ fn iterative () -> u64 {
 }
 
 /// Size of the Integer Partition of 𝑛
+/// computed using dynamic programming.
+///
+#[allow(dead_code)]
 fn p (n: u64) -> u64 {
     let a = n as usize;
     let mut r = vec![0u64; a + 1];
@@ -78,12 +83,80 @@ fn p (n: u64) -> u64 {
     r[a]
 }
 
+/// Size of the Integer Partition of 𝑛
+/// computed using Euler's Pentagonal Number theorem.
+///
+///    𝑝(𝑛) = ∑ (−1)ᵏ⁻¹·𝑝(𝑛 − 𝑔ₖ)   ∀𝑘 ≠ 0 ∧ 𝑘 ∊ ℤ
+///
+/// where 𝑔ₖ are the generalized pentagonal numbers
+///
+///    𝑔ₖ = 𝑘·(3·𝑘 − 1) ∕ 2   ∀𝑘 ≠ 0 ∧ 𝑘 ∊ ℤ
+///
+/// Expanding 𝑝(𝑛) gives the following paired terms
+/// with alternating sign every two numbers:
+///
+///    𝑝(𝑛−1)+𝑝(𝑛−2) − 𝑝(𝑛−5)−𝑝(𝑛−7) + 𝑝(𝑛−12)+𝑝(𝑛−15) − ...
+///
+struct Partitions { x: Vec<u64> }
+impl Partitions {
+    fn new () -> Self { Self { x: vec![1] } } // p(0) = 1
+    fn n (&mut self, n: u64) -> u64 {
+        let a = n as usize;
+
+        // Avoid work since this value has already been computed.
+        if a <= self.x.len() - 1 { return self.x[a]; }
+
+        // Expand the table to include the requested partition of 𝑛.
+        self.x.reserve(a + 1 - self.x.len());
+
+        // Compute missing values up to 𝑛.
+        for i in self.x.len()..=a {
+            let mut pos = 0u64;
+            let mut neg = 0u64;
+            let mut k = 1u64;
+
+            loop {
+                // Generalized pentagonal numbers 𝑔ₖ = 𝑘·(3·𝑘 − 1) ∕ 2
+                //
+                //    gₚ = 𝑔₊ₖ = 𝑘·(3·𝑘 − 1) ∕ 2
+                //    gₙ = 𝑔₋ₖ = 𝑘·(3·𝑘 − 1) ∕ 2
+                //
+                let g_pos = (k * (3 * k - 1) / 2) as usize;
+                let g_neg = (k * (3 * k + 1) / 2) as usize;
+
+                // Odd terms of the generalized pentagonal numbers are positive.
+                let is_positive = k & 1 == 1;
+
+                // First term of the pair: 𝑝(𝑖 − gₚ)
+                if g_pos <= i {
+                    if is_positive { pos += self.x[i - g_pos]; }
+                    else { neg += self.x[i - g_pos]; }
+                }
+                else { break; }
+
+                // Second term of the pair: 𝑝(𝑖 − gₙ)
+                if g_neg <= i {
+                    if is_positive { pos += self.x[i - g_neg]; }
+                    else { neg += self.x[i - g_neg]; }
+                }
+                else { break; }
+
+                k += 1;
+            }
+
+            self.x.push(pos - neg);
+        }
+
+        self.x[a]
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_integer_partition () {
+    fn test_integer_partition_function () {
         assert_eq!(p(0), 1);
         assert_eq!(p(1), 1);
         assert_eq!(p(2), 2);
@@ -91,5 +164,18 @@ mod tests {
         assert_eq!(p(4), 5);
         assert_eq!(p(5), 7);
         assert_eq!(p(40), 37_338);
+    }
+
+    #[test]
+    fn test_integer_partition_iterator () {
+        let mut partitions = Partitions::new();
+
+        assert_eq!(partitions.n(0), 1);
+        assert_eq!(partitions.n(1), 1);
+        assert_eq!(partitions.n(2), 2);
+        assert_eq!(partitions.n(3), 3);
+        assert_eq!(partitions.n(4), 5);
+        assert_eq!(partitions.n(5), 7);
+        assert_eq!(partitions.n(40), 37_338);
     }
 }
