@@ -28,15 +28,23 @@ pub fn run () {
 
 fn iterative () -> u64 {
     let primes = eratosthenes(10_000_000);
-    let mut min_ratio = f64::INFINITY;
+    let mut min_phi = 1u64;
     let mut r = 0;
 
     for n in 2..10_000_000 {
         let a = phi(n, &primes);
-        let b = (n as f64) / (a as f64);
-        if b >= min_ratio { continue; }
+
+        // We need to test whether 𝑛 ∕ 𝜑(𝑛) is less than the current minimum.
+        // This can be done using cross-multiplication so as to avoid division.
+        //
+        //    𝑛 ∕ 𝜑(𝑛) < min-n ∕ min-phi
+        //    𝑛 ⨯ min-phi < min-n ⨯ 𝜑(𝑛)
+        //
+        let b = r != 0 && (n as u128 * min_phi as u128) >= (r as u128 * a as u128);
+        if b { continue; }
+
         if !is_permutation(n, a) { continue; }
-        min_ratio = b;
+        min_phi = a;
         r = n;
     }
 
