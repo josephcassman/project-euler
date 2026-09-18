@@ -20,19 +20,43 @@
 //!
 
 use crate::etc::sequences::primes::eratosthenes;
-use crate::etc::factorization::phi;
 
 pub fn run () {
     println!("\niterative method: {}\n", iterative());
 }
 
+///
+/// The ratio 𝑛 ∕ 𝜑(𝑛) is minimized when 𝑛 is close to 𝜑(𝑛).
+/// 𝑛 cannot be prime since 𝜑(𝑛) = 𝑛 − 1.
+/// Semiprimes, however, will work. Two is best since using
+/// more will just make the ratio larger.
+///
+///    𝑛 ∕ 𝜑(𝑛) ⇒ 𝑝₁·𝑝₂ ∕ 𝜑(𝑝₁·𝑝₂)
+///                𝑝₁·𝑝₂ ∕ (𝑝₁ − 1)·(𝑝₂ − 1)
+///                𝑝₁ ∕ (𝑝₁ − 1) ⨯ 𝑝₂ ∕ (𝑝₂ − 1)
+///
+/// To make the two ratios as close to 1 as possible,
+/// 𝑝 must be as large as possible. Here are a few examples
+/// to show that this is the case.
+///
+///    (3, 5)      ⇒   3 ∕ 2 ⨯ 5 ∕ 4 = 1.875
+///    (17, 19)    ⇒   17 ∕ 16 ⨯ 19 ∕ 18 = 1.122
+///    (251, 257)  ⇒   251 ∕ 250 ⨯ 257 ∕ 256 = 1.008
+///
+/// The largest primes that keep the ratio under 10⁷
+/// are those near √10⁷ ≈ 3162.
+///
 fn iterative () -> u64 {
-    let primes = eratosthenes(10_000_000);
+    let primes: Vec<_> = eratosthenes(5000).into_iter().filter(|&x| x > 2000).collect();
     let mut min_phi = 1u64;
     let mut r = 0;
 
-    for n in 2..10_000_000 {
-        let a = phi(n, &primes);
+    for (i, &p) in primes.iter().enumerate() {
+    for &q in &primes[i + 1..] {
+        let n = p * q;
+        if n >= 10_000_000 { break; }
+
+        let phi = (p - 1) * (q - 1);
 
         // We need to test whether 𝑛 ∕ 𝜑(𝑛) is less than the current minimum.
         // This can be done using cross-multiplication so as to avoid division.
@@ -40,13 +64,13 @@ fn iterative () -> u64 {
         //    𝑛 ∕ 𝜑(𝑛) < min-n ∕ min-phi
         //    𝑛 ⨯ min-phi < min-n ⨯ 𝜑(𝑛)
         //
-        let b = r != 0 && (n as u128 * min_phi as u128) >= (r as u128 * a as u128);
+        let b = r != 0 && (n as u128 * min_phi as u128) >= (r as u128 * phi as u128);
         if b { continue; }
 
-        if !is_permutation(n, a) { continue; }
-        min_phi = a;
+        if !is_permutation(n, phi) { continue; }
+        min_phi = phi;
         r = n;
-    }
+    }}
 
     r
 }
