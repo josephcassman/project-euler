@@ -28,8 +28,8 @@ pub fn run () {
 fn iterative () -> u64 {
     let mut partitions = Partitions::new();
 
-    for n in 6.. {
-        if partitions.n(n) % 1_000_000 == 0 {
+    for n in 1.. {
+        if partitions.n(n) == 0 {
             return n;
         }
     }
@@ -97,10 +97,28 @@ fn p (n: u64) -> u64 {
 ///
 ///    𝑝(𝑛−1)+𝑝(𝑛−2) − 𝑝(𝑛−5)−𝑝(𝑛−7) + 𝑝(𝑛−12)+𝑝(𝑛−15) − ...
 ///
+/// According to the Hardy-Ramanujan formula, 𝑝(𝑛) grows
+/// asymptotically according to
+///
+///    1 ∕ 4·𝑛·√3 ⨯ exp(𝜋·√(2·𝑛 ∕ 3))
+///
+///    𝑛      estimate
+///    5       670
+///    100     5.978e12
+///    1000    7.321e37
+///
+/// The above estimates show that practical computation of 𝑝(𝑛)
+/// is unrealistic since the sequence grows exponentially.
+///
+/// Since we are looking for divisibility by one million,
+/// we can use modular arithmetic to keep the values computable.
+///
 struct Partitions { x: Vec<u64> }
 impl Partitions {
     fn new () -> Self { Self { x: vec![1] } } // p(0) = 1
     fn n (&mut self, n: u64) -> u64 {
+        const MOD: u64 = 1_000_000;
+
         let a = n as usize;
 
         // Avoid work since this value has already been computed.
@@ -119,7 +137,7 @@ impl Partitions {
                 // Generalized pentagonal numbers 𝑔ₖ = 𝑘·(3·𝑘 − 1) ∕ 2
                 //
                 //    gₚ = 𝑔₊ₖ = 𝑘·(3·𝑘 − 1) ∕ 2
-                //    gₙ = 𝑔₋ₖ = 𝑘·(3·𝑘 − 1) ∕ 2
+                //    gₙ = 𝑔₋ₖ = 𝑘·(3·𝑘 + 1) ∕ 2
                 //
                 let g_pos = (k * (3 * k - 1) / 2) as usize;
                 let g_neg = (k * (3 * k + 1) / 2) as usize;
@@ -144,7 +162,27 @@ impl Partitions {
                 k += 1;
             }
 
-            self.x.push(pos - neg);
+            // Use the fact that the following holds to work around
+            // a potential overflow when neg > pos:
+            //
+            //    x - y ≡ x + A - y (mod A)
+            //
+            // Example: (x, y, A) = (5, 7, 20)
+            //
+            //    5 - 7      = -2 ≡ 18 (mod 20)
+            //    5 + 20 - 7 = 18 ≡ -2 (mod 20)
+            //
+            // A = 1000000
+            // 𝑝(𝑖) = pos − neg (mod A)
+            //      = (pos % A − neg % A)
+            //      = ((pos % A) + A − (neg % A))
+            //
+            let x = pos % MOD;
+            let y = neg % MOD;
+
+            // Reduce modulo 1000000 again to make sure
+            // the value fits within u64 bounds.
+            self.x.push((x + MOD - y) % MOD);
         }
 
         self.x[a]
