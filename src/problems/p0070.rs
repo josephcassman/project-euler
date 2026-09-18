@@ -33,12 +33,11 @@ fn iterative () -> u64 {
 
     for n in 2..10_000_000 {
         let a = phi(n, &primes);
-        if !is_permutation(n, a) { continue; }
         let b = (n as f64) / (a as f64);
-        if b < min_ratio {
-            min_ratio = b;
-            r = n;
-        }
+        if b >= min_ratio { continue; }
+        if !is_permutation(n, a) { continue; }
+        min_ratio = b;
+        r = n;
     }
 
     r
